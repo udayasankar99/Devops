@@ -1,0 +1,103 @@
+1.What is the role of devops engineer? how they use git and maven and jenkins? How the work comes-- still not clear
+
+2.How work will be distributed in git and how it is merged?
+	Developers clone the project, creates branch and start working on their module. Once they completed the work, they push their code to central repo. Then they will raise merge request/pull request. After review they will merge will be performed.
+
+Before push always perform pull.
+
+3.Deployments in maven.
+	Deployments happen in two ways.
+		1. artifacts stored local repo like nexus
+			It can be done using DistributionManagement
+		2. artifcats stored application server
+			It can be used using the particular application server plugin
+
+4.HOw UC and artifact or nexus is used in SF?
+		The above answers the question. UC is application server and nexus is local repo
+
+5. What to learn in Jenkins? Learning Master and slave architecture, integration of jenkins with GIT,integration of jenkins with DOCKER, integration of jenkins with Selenium, Jenkins File with groovy script will be enough
+
+6. Most frequent used plugins/What are the CI/CD tools used in SF?
+
+7. What happens if build fails, will test and deploy happens?
+   What happens if test fails , will deploy happens? 
+
+8. How agile and devops ar related?
+
+	Agile is a software methodlogy where devops helps to achieve that methodology
+
+
+9. What are upstream and downstream projects in jenkins
+	Jobs which are previous to the current job are upstream jobs, and which are after to the cuurent jobs are downstream jobs
+10. webhooks??
+
+11. Add Parametrization jenkins??   ------>
+
+12. In the pipeline view example, deploy to dev and acceptance stage is done using ansible command, why they did not use deploy command and distribution management to deploy to nexus??
+
+13. If there more than one post build steps, how the order will be??---->
+	
+
+14. What is CI and CD?
+
+15. What is jenkins user?
+
+16. Why sudoers file needs to be configured????--------->
+
+
+17. How will configure softwares required in slave machines
+
+18. In a Pipeline job, will create each job for compile, test, package or create one job??
+
+19. Would you configure SMTP for mail notifications?
+
+20. How to manage backup of all the configiration?(Thin Backup)
+
+21. How do you detect Jenkins configiration changes? (Job Configiration History Plugin)
+
+22. How do you get the details of any jobs using Linux commands
+
+23. When integration of jobs is achieved using List View, why we go for pipeline view?
+	is it only because visualization
+
+
+	You can use GET method to get the details of the job, just give the url of the job /api
+
+23. In SF, Instead Jira which tool we are using
+
+24. How Urban code deployment is made possible using Jenkins?
+	When you add UC plugin, all the features of UC are avaiable in Jenkins.
+	I.e what options dropdown present in UI, will be available to you in Jenkins. So with you create jobs.
+
+25. Suppose if a plugin is not working. how can you handle the situation?
+	First check the compatiability of jenkins and plugins.
+	If Compatiability is good, then find the command that is required to do the job and give it in POST script.
+	Here instead of plugin triggering the command, we are triggering the command 
+
+26. In SonarQube, if there are issue after scanning, who will fix the issue??
+	Not needed
+
+27. How to develop plugin on your own?
+	Jenkins Code
+	Core Java
+	Groovy
+	HPI
+
+28. How to you achieve code coverage in jenkins??
+
+29. How to migrate your existing pipeline jobs to script?
+
+30. Config Global Security --> Agent allows TCP inbound --> Random is seleted or not
+
+31. Explain master and slave for Linux and Windows   
+
+
+
+
+Git -->  Test (sonarqube, CI build-->RC release/Build
+scm checkout  maven-release plugin
+
+snapshot
+RC
+
+--> GitCiCD

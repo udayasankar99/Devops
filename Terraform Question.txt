@@ -1,0 +1,36 @@
+1.Which language Terraform Using?
+
+GO
+
+
+2.Will the Terrform files needs to be changed for different providers?
+
+Yes terrfarom files *.tf will be changed, because resources will be different for diferent provideres
+
+3. What is the editor used for terraform in sf?
+	you can use notepad++, In SF -->  Intellij
+
+4. How do you provide access_key and secret_key in SF?
+	In my personal AWS account, IAM --> Create Access Key --> Access Key ID and Secret access key. But in SF how it is done
+
+5. How do you lock two people perfoming apply or how do you avoid conflict between 2 person working on same infrastruture?
+
+	Terraform Backend - Need to have the state file in common locations like S3 or Consul or Terraform Enterprise
+
+	S3
+	Consul
+	Terraform Enterprise
+
+	Technically you can use GIT, but the state file will have confidential details so we need to avoid that
+
+6. Where do you maintain state file in SF?
+
+6. How to create Security Groups and SSH key pair
+
+7. Where do you keep your variables *.tfvars or var.tf?
+
+8. will you create terraform workspace environment first then apply init?
+
+		You need to init for root as well as sub-folders
+
+9. How do you use modules from terrafom registry?

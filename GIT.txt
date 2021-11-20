@@ -1,0 +1,379 @@
+GIT:
+It is distributed source control system, open source
+
+git [tool name]  -- commit, push, config all are tools comes as part of git 
+=========================================================================
+
+GIT Configirations:
+----------------------------------------------------------------------
+git config
+	-- global  (personal info)
+	-- local
+	-- system
+
+git config --global -e -- to edit gitconfig file
+git config --global user.name "uday"
+git config --global user.email "uday@gmail.com"
+git config --global core.editor "notepad++.exe -multiInst -nosession"
+git config --list --  all config details
+git config --global --list
+============================================================================
+Aliases:
+git config --global alias.youralias "git command to b replaced"
+eg: git config --global alias.allcommit "log --oneline --grapg --all"
+	git allcommit
+
+git help <verb>
+git <verb> --help
+git version
+git show commitid
+---------------------------------------------------------------------------
+
+git init -- to create local repo
+git clone url-- clone your repo ffrom github
+git clone url <prefferred name>-- clone your repo ffrom github with preferred name
+------------------------------------------------------------------------
+git remote add origin <link> -- origin refers to central server
+git pull origin master  -- master refers master branch
+git push origin master
+git push origin branchName
+
+-------------------------------------------------------------------------
+git status -- tells you which files are added to index and are ready to commit
+git status -s --> everthing will disply in short form
+	?? - untracked
+	A  - staging area
+	M  - Modified files
+
+git add   -- lets you add files to your index
+	git add filename.txt  
+	git add -A  --  add all files to index
+================================================================================
+Commits:
+It is a snapshot.
+---------------------------------------------------------------------------
+Commit:
+tree  ----------->  internally stores as tree
+parent
+author
+committer
+
+
+Snapshot A
+
+5de98  -- commit id
+
+Commit:
+tree 87c3e
+parent
+
+
+Snapshot B
+
+4ae12   -- commit id
+
+Commit:
+tree 9ea23
+parent 5de98
+
+
+------------------------------------------------------------------------------
+git commit -- it refers to recording snapshot of the repo at a given time
+	git commit      --> opens vi editor you can give commit message in more than one line
+	git commit -v   --> gives more details
+	git commit -m "some messsage"
+	git commit -a -m "some message" --  adds modified content to index and commit(cannot use it for files)
+
+-----------------------------------------------------------------------------
+Logs:
+
+git log  --  provides commit id, author and date
+git log -5 --> last 5 commits
+got log -p --> more details like diff btw two commits
+git log --pretty=oneline  --> gives info in one info
+git log --pretty=short    --> gives bit more info
+git log --pretty=full	  --> 	
+git log --oneline
+git log --oneline --all  --> shows log for all branches
+git log --oneline --graph --all --> shows log graphical rep(it is very very useful)
+
+=================================================================================
+Branch:
+Local branching
+Remote Branching
+
+Local Branching:
+It is a pointer points to the latest commit
+
+git branch branchName --  creates branch name
+git checkout branchName -- switch to new branch
+git checkout -b branchName --> create and switch to branch at the same time
+git branch -d branchName   --> deletes branch
+git branch -a              --> tells all branches
+
+HEAD - It is a pointer to branches
+
+Head --> master,branch1 --> points to master branch
+HEAD --> branch1,master --> points to branch1 
+------------------------------------------------------------------------------
+Remote Branching:
+After cloning the project, give the below cmd.
+
+git log --oneline --all --graph
+ -->(HEAD -> master, origin/master, origin/HEAD) [origin/master and origin/HEAD is from remote repo]
+
+Fetch & Pull:
+-----------------------------------------------------------
+Fetch - It pulls the data from remote repo but not applies to your working directory. Actually pulls the data and stores in origin/master branch. you need to merge manually to master to make it available to your working directory
+
+git fetch origin
+git branch -a
+		*master  --- local
+		remotes/origin/HEAD
+		remotes/origin/master
+git merge origin/master (you are in master branch)
+
+Pull  - It pulls the data from remote repo and applies to your working directory
+git pull origin master
+=====================================================================
+Merge:
+
+git branch --merge   --> tells which branches are merged
+git branch --no-merge --> tells which branches are not merged
+
+git merge branchName (you are in master) -- merges master and branchName
+
+Merge Strategy:
+fast-forward  --> two branches derived from same commit/ancestor
+recursive     --> two branches derived from different commit/ancestor
+------------------------------------------------------------------------------------------
+Merge Conflicts:
+When same file is modified in two branches(master and branch1), then you will end with merge conflits.
+
+So do the below steps:
+
+git status -- in the unmerged paths, you will see the conflict file.
+
+open the file, you will see something like below.
+<<<<<HEAD
+content in master
+==========================
+content in branch1
+>>>>>>branch1
+
+discuss and decide which data you want, either top or bottom.
+
+git add filename
+git commit -m "some message"
+Merge is successfully done
+=================================================================================
+Rebase - 
+---------------------------------------------------------------------------
+git rebase branchName (you are in master) -- this also merges but in a linear way, here branchname append to head of the master
+
+No of commits will be reduced
+
+Both merge and rebase does the same work but the commit history will be different
+
+Merge Conflict:
+----------------------------------------
+Merge Conflicts:
+When same file is modified in two branches(master and branch1), then you will end with merge conflits.
+
+So do the below steps:
+
+git status -- in the unmerged paths, you will see the conflict file.
+
+open the file, you will see something like below.
+<<<<<HEAD
+content in master
+==========================
+content in branch1
+>>>>>>branch1
+
+discuss and decide which data you want, either top or bottom.
+
+git commit -m "resolved issues"
+git rebase continue
+
+==================================================================================
+
+Stashing:
+
+git stash or git stash push --> the contents in the staging area will stashed(like recycle bin), so your staging are will be clean
+
+git stash -u  --> stashes staging area as well as untracked files
+
+git stash list  --  to see the stashes  stash@{0},stash@{1} , it is like stack
+
+git stash apply -- > applies the latest stash which is at the top but it will not drop the stash
+
+		if you check stash list --> git stash list --> you will still see stash{0}, and stash{1}, you need to drop 		using the below cmd
+
+git stash drop
+
+git stash apply stash@{1} --> to apply specific stash
+you cN 
+git stash pop  --> applies and drops the stash
+
+git stash branch oldidea
+
+you chahged a file home.tex and stashed, so your staging are will be clean.
+Now you changed some other files and commited twice or thrice.
+Suppose you want resume from where you stashed and you dont want the couple commits you made.
+
+git stash branch oldidea  -- you can continue before the commits weree made
+
+
+=======================================================================================
+
+Cleaning:
+
+git clean -f    	--> will clean only untracked files and not folders and it is permanent delete.
+git clean -f -d 	--> will clean untracked files and folders and it is permanent delete.
+git clean -f -d -x	--> will clean untracked files, files mentioned in .gitignore, .gitignore file itself and folders and 			it is permanent delete.
+git clean -f -n or git clean -f --dry-run -- will tel what files will it remove
+------------------------------------------------------------------------------
+
+Tagging:
+
+git tag -list or git tag -l -- tells if tags are already available
+git tag -list "v1.*"  -- pttern search
+git tag v1.0  --> will be available to the latest commit
+git tag -a v2.0 -m "some description"
+git diff tag1 tag2 --> tells the differance btw two tags
+git tag -d tagname  --> deletes the tag
+git tag -a v1.0 commit-id -m "some message" --> adds tags to the commit id, can add to the old projects also
+git tag -a v1.0 -f commit-id -m "some message"  --> updates tag to different commit id
+git push origin master --tags  --> pushes to master along with tags
+
+GIT WorkFlow:
+Local:
+	1.working directory
+	2.staging area/index area
+	3.localrepo(.git folder)
+Remote:
+	4.remote repo(github)
+
+Server default name - origin
+
+============================================================================
+git remote --> origin  --- returns default name of the server
+
+git pull and fetch??
+git stash and apply??
+
+===================================================================
+
+Generate SSH public key:
+-------------------------------------------------------------------
+ssh-keygen  -- generates public and private key
+cat location of .pub file
+
+copy ssh key and paste it in github account "SSH and GPG  keys"
+
+ssh -T sshurl  -- to validate authentication
+================================================================================
+
+
+How to revert back to previous commit??
+git checkout commitid filename [commit id is first 8 characters]
+===============================================================================
+
+Configure Notepad++:
+---------------------------------------------------------
+Set Environment Variables - System Variables - path(.exe location)- close gitbash and then open
+
+$ notepad++ myfilename
+
+Setting  aliases: 
+
+$ notepad++ .bash_profile
+$ alias npp='notepad++.exe -multiInst -nosession'  --> npp is the alias for notepad++
+$ npp filename
+
+=====================================================================
+GitIgnore:
+---------------------------------------------------------------------
+
+You need configure rules in .gitignore file
+
+*.js  --  ignore all .js files in the project
+!main.js -- negates main.js file
+file1.text -- ignores file1.txt file
+build/ --  ignores build folder
+/test.txt - ignores test.txt in the current folder
+=================================================================
+
+DIFF
+-----------------------------------------------------------------
+
+git diff --> tell differance between file content of staged and modified 
+git diff --staged  -- bshows the content of staged file
+git diff -- cached -- samed as above
+
+
+
+Lifecycle of Status:
+-----------------------------------------------------------------
+1.Untracked
+2.Tracked
+	1.unmodified
+	2.Modifed
+	3.Staged
+
+=====================================================================
+Tools:
+P4Merge:
+This tool will visually shows diff or merge conflits and it will be verv useful
+
+Diff tool config:
+git config --global diff.tool p4merge
+git config --global difftool.p4merge.path "path to p4merge"
+git config --global difftool.prompt false
+
+Merge tool config:
+git config --global merge.tool p4merge
+git config --global mergetool.p4merge.path "path to p4merge"
+git config --global mergetool.prompt false
+
+========================================================================
+
+Checkout, Reset,  Revert
+----------------------------------------------------------------------
+
+git checkout <filename> --> to discard changes of a particular file in working directory
+git checkout .          --> to discard changes in working directory for all files
+
+git reset HEAD <filename> --> to unstage a file from staging area to working directory
+git reset HEAD .	  --> to unstage all files from staging area to working directory
+
+git reset HEAD~1          --> resets latest 1 commit
+git reset HEAD~2	  --> resets latest 2 commit
+
+You cannot reset a particular commit using commit id
+
+git reset --soft HEAD <filename>  --> removes the commit and keep the files in staging directory
+git reset --mixed HEAD <filename> --> removes the commit and keep the files in working directory(default)
+git reset --hard HEAD <filename>  --> removes the commit and deletes the files
+
+reset will be used when the commits are not yet pushed to central repo. Because when you reset, the commit-id will be removed from the history and when you push there will be conflict issue saying  there is remote commit not present locally.
+
+To resolve that problem git revert will be used
+
+git revert commit-id --> revert will not remove the commit-id mentioned, it keeps the history, but the contents will be reverted and a new commit-id will be generated.
+
+Since reverted commit-id is not removed from history, you can push it to central repo without any issues.
+
+
+
+
+
+
+Common commands
+ls -al --> to show hidden files
+mkdir
+rm -rf folder/
+rm filename.ext
+cd ..
+cat filename.ext

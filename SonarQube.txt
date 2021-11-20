@@ -1,0 +1,87 @@
+What is SonarQube? 
+Quality management tool(code and test quality)
+	1. Code quality
+	2. Test Quality
+
+
+Note: You can add different SCA tools to Sonar by adding plugins, so the no of rules will be increased
+
+
+How to get quality reports of the code?
+	Code Quality:
+	- Peers code review
+	- Static Code review - COde would review code(Rules) --> This is done through SCA (Static Code Analysis)tool
+
+	Test Quality:
+		Test Reports
+		Code Coverage Reports
+
+
+SCA Tool -- Generate Reports but there are lot many tool available specific to a program language. 
+
+Report contains:
+	What is the issue
+	Who made it
+	When it was introduced
+	How to fix it
+	Where is that line?
+----------------------------------------------------------------------------------------
+
+Why do we need Sonarcube??
+Suppose in your organisation many developers would be there say one java, developers, python, each one would use different SCA tools and so many reports will be generated daily.
+
+So it will be tough task to maintain so many tools and keep track of the report and rules
+
+------------------------------------------------------------------------------------------------------
+Sonarcube is developed using java. We need JRE11
+
+Sonarcube Architecture
+
+Scanner--> Source Code --> Reports --> Server
+
+Scanner Agent runs on source code -->  downloads rules from server and apply on code --> generates reports --> upload report to database on server which makes it available on dashboard
+
+Scanner Agent is a jar file, which oyu run using jenkins, maven gradle etc
+
+ 
+
+Server:
+	Dashboard
+		Rules
+		Projects
+		Issues
+		Quality Profile
+		Gate
+		Admin
+	Backend Support
+		MSSQL
+		Postgre
+		Oracle
+
+
+SOurce Code :
+	It will be having a property file which will be created automatically by jenkins or maven. Or you need to create it manually
+
+HOw to run scanner??
+
+Go to the source code folder and run the executable of scanner.
+
+
+Quality Profiles:
+Here you can define your own profile with rules. After that go the source code property file and change sonar.profile propert
+
+Quality Gates:
+It is set of conditions set by product owner or client like if no of bugs are more than 5 then i wont accept, if no of duplicate lines are moe than 10 then wont accept. In that case snarqube fails it  
+
+
+Used to run static code analysis
+
+Plugin used:
+Sonarcube server
+Sonarcube scanner
+
+SOnar Cube COnfigs:
+
+SOnarqube 6 - JDK 8
+SOnarqube 7 - JDK 11
+Non root user must be there to start a sonaqube server

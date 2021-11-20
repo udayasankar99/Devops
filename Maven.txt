@@ -1,0 +1,738 @@
+Build Management:
+
+Compilation:
+
+raw source code --> object files
+
+Assembly  : creating jar, war, ear
+Running automated test
+Deploying to production system
+Creatinig documention
+
+1.java : class
+2.java : class	--> deliverables/packages (jar, war, ear)
+3.java : class
+
+Maven :(Java based build tool)
+
+It is a project management tool which encompasses a project object model, a set of standards, a project lifecycle, a dependency management system, and logic for executing plugin goals at defined phases in a lifecycle
+
+It masnages build, reporting and documentation 
+Features:
+Build-tool
+Dependency management tool
+Documentation tool
+===================================================================================================
+Maven Architecture:
+--------------------------------------------------------------------------------------------------
+Local Repo  -->  Project Directory/maven/pom.xml  --> Remote Repo
+
+pom.xml is thed config file
+
+Maven will first check library in local repo if that is not available then will check remote repo so you need internet access
+
+mvn --> [goals]  --> plugins(jar) --> task
+
+When you ask maven to do a spefific goal, it will look for required jars/plugins in local repo / remote repo. Then ut will perform the task
+======================================================================================================
+Maven Build Lifecyle:
+------------------------------------------------------------------------------------------------------
+
+Default Lifecycle:
+
+-validate/generate-sources/generate-resources - validates if there are any errors
+-compile
+-test
+-package
+-integration-test
+-verify - Verifies the jars are build correctly
+-install
+-deploy
+
+
+Install - it will copy the package to local repo.
+
+COnsider there are two projects, one package is A.jar, and the other one is B.jar. Suppose B.jar project A depends on Project B, then A.jar will not be available in local repo as well as Remote repo. so you need to install it to local repo, so projects will be making use of it.
+
+
+mvn install (Project A)
+
+There is also clean and site
+
+clean - it will delete all the runtime files like packages, unit test result, compilation files(.class)
+
+site - it is used for documentation
+
+Examples:
+--------------------------------------------------------------------------------------------------
+mvn install 	-- Invokes generate, compile,test package,integration-test and install
+mvn clean 	-- just clean
+mvn clean compile -- cleans first and then does till compile
+mvn compile install -- Invokes generate, compile,test package,integration-test and install
+
+			It does not repeat steps even though you mentioned compile and install, it took the goal which is the lomngest
+
+mvn test clean  	-- Invokes generate, compile,test and then cleans
+
+======================================================================================================
+Standard Directory Structure:
+-----------------------------------------------------------------------------------
+src/main
+	/java/1.java
+	/resources
+src/test
+	/java/1_test.java
+	/resources
+pom.xml
+
+============================================================================================
+
+Maven identifies Project using GAV:
+
+G - Groupid  - organisation/business
+A - Artifact - name of the project
+V - Version  - version of the project
+		Format {Major}.{Minor}.{Maintainance}
+		Add -SNAPSHOT to identify in development
+
+GAV syntax : groupId:Artifact:Version
+
+
+Maven is not installer, it is distributed file, just extract the archieve
+
+Prerequiste:
+
+Java 1.7 or later needs to be installed.
+
+java -version
+echo %JAVA_HOME%  --> C:\Program Files\Java\jdk1.7.0_79
+
+COnfigure:
+
+Add a new User Variable called M2_HOME and set the Value
+
+M2_HOME - Give the path the extracts of maven content
+M2      - give the path till bin folder
+PATH    - Give the path till bin folder
+
+
+mvn --version
+mvn archetype:generate -- choose the template details
+
+When you run maven commands, go into the project directory where pom file is present, because mavn read pom files first then executes goals
+
+
+After compilation, target folder wil be created, target/classes/.class
+
+--------------------------------------------------------------
+mvn compile
+
+maven-resources-plugin:2.6:resources
+maven-compiler-plugin:3.1:compile
+
+-------------------------------------------------------------[---
+mvn test
+maven-resources-plugin:2.6:resources
+maven-compiler-plugin:3.1:compile
+
+maven-resources-plugin:2.6:resources - test
+maven-compiler-plugin:3.1:compile - test
+
+maen-surefire-plugin: test
+Test results
+
+----------------------------------------------------------------
+mvn package
+
+maven-resources-plugin:2.6:resources
+maven-compiler-plugin:3.1:compile
+
+maven-resources-plugin:2.6:resources - test
+maven-compiler-plugin:3.1:compile - test
+
+maen-surefire-plugin: test
+Test results
+
+maven-jar-plugin:2.4:jar
+Building jar
+
+Note: jar file will stored in target folder, projectname-version.jar
+----------------------------------------------------------
+
+mvn install
+
+maven-resources-plugin:2.6:resources
+maven-compiler-plugin:3.1:compile
+
+maven-resources-plugin:2.6:resources - test
+maven-compiler-plugin:3.1:compile - test
+
+maen-surefire-plugin: test
+Test results
+
+maven-jar-plugin:2.4:jar
+Building jar
+
+
+maven-install-plugin:2.4:install
+Installing C:ss/sds/ to local(.m2 folder)
+
+
+------------------------------------------------------------------
+
+mvn clean 
+
+maven-clean-plugin:2.5:clean
+
+deletes the target folder
+-------------------------------------------------------------------  
+
+
+Remote Repo:
+http://repo1.maven.org/maven2
+
+=======================================================================
+POM:(Project Object Model)
+
+It is an XML file that contains info about the project and configuration details used by maven to build the project
+
+It contains:
+GAV
+Artifact Type
+Source Code location
+Dependencies
+Plugins
+Profiles
+
+
+============================================================================
+
+Maven Plugin Management:
+
+Maven is a plugin execution framework where every task is done using plugins
+Other than default lifecycle everything else will be handled through plugins
+Search maven plugins in google, you will find all plugins in maven site
+
+A plugin generally provides a set of goals and which can be executed using following syntax:
+
+%mvn [plugin-name]:[goal-name]
+%mvn compiler:compiler
+
+Plugin Types:
+---------------------------------------------------------------------------------------------
+1.Build Plugins: They execute during the build and should be configured in the <build> element of pom.xml
+2.Reporting Plugins : They execute during the site generation and they should be configured  in the <reporting> element of pom.xml
+
+Plugins are specified in pom.xml  using <plugins>
+Each plugin can have multiple goals
+
+
+<project>
+<GAV>
+
+<build>
+	<plugins>
+		<plugin>
+			# what is the plugin GV
+			<groupid> XXX</groupid>
+			<artifactid> YYY </artifactid>
+			<version> 1.0 </version>
+			<executions>
+				<execution>
+					# When is plugin has to be invokde
+					<phase>compile</phase> ----------------------> after compile phase test goal will be called 											which in turn executes the plugin mention 
+					<goals>
+						<goal>test</goal>
+					</goals>
+					<configuration>
+						# What the plugin has to do
+						<tasks>
+							<echo>some task</echo>
+						</tasks>
+					</configuration>
+				</execution>
+			</executions>
+			
+			
+		</plugin>
+		<plugin>
+			# what is the plugin GV
+			# When is plugin has to be invokde
+			# What the plugin has to do
+		</plugin>
+	</plugins>
+</build>
+
+</project>
+
+How do you call ANT script from maven:
+------------------------------------------------------------------------------
+Using antrun-plugin.
+
+<build>
+	<plugins>
+		<plugin>
+			<groupid> org.apache.maven.plugins</groupid>
+			<artifactid> maven-antrun-plugin</artifactid>
+			<version> 1.1 </version>
+			<executions>
+				<execution>
+					<id>id.clean</id>
+					<phase>compile</phase> ----------------------> after compile phase test goal will be called 											which in turn executes the plugin mention 
+					<goals>
+						<goal>run</goal>
+					</goals>
+					<configuration>
+						<tasks>
+							<echo>some task related to ANT</echo>
+						</tasks>
+					</configuration>
+				</execution>
+			</executions>
+			
+			
+		</plugin>
+		<plugin>
+			# what is the plugin GV
+			# When is plugin has to be invokde
+			# What the plugin has to do
+		</plugin>
+	</plugins>
+</build>
+
+
+When you run mvn compile now.
+
+maven-resources-plugin:2.6:resources
+maven-compiler-plugin:3.1:compile
+maven-antrun-plugin:1.1:run(id.clean)  --> see after compile antrun is executed
+
+
+
+How do you run a executable like git --version
+
+exec-maven-plugin
+
+<plugin>
+			<groupid> org.codehaus.mojo</groupid>
+			<artifactid>exec-maven-plugin</artifactid>
+			<version> 1.1 </version>
+			<executions>
+				<execution>
+					<id>id.clean</id>
+					<phase>compile</phase> ----------------------> after compile phase test goal will be called 											which in turn executes the plugin mention 
+					<goals>
+						<goal>run</goal>
+					</goals>
+					<configuration>
+						<executable>git</executable>
+						<arguments>
+							<argument>--version</argument>
+					
+						</arguments>
+					</configuration>
+				</execution>
+			</executions>
+			
+			
+		</plugin>
+
+===========================================================================================================================
+
+Plugin Invocations:
+1. Using phase association(plugin invocation using phase)
+	In Antrun plugin example, you have specified phase and goal, so when that phase is invoked it in turn call the goal which in turn calls the specified plugin
+
+	phase --> goal --> plugin
+But if there is a situation where you dont want to invoke any phase, you just want to execute plugin alone
+
+2. Using direct goals
+	In exec plugin example, you did not mention any phase or goals.
+		just invoke the plugin using mvn exec:exec  --> calls the plugin alone
+
+goals details will be available in maven site
+
+
+===============================================================================================================
+
+Profiles:
+
+<profiles>
+	<profile>
+	<id>test</id>
+	<build>
+		<plugins>
+			<plugin>
+			</plugin>
+		</plugins>
+	</build>
+	</profile>
+</profiles>
+
+invoke using mvn package -Ptest or mvn test -Ptest
+If you give mvn package then profiles will not invoked
+==============================================================================================================	
+MAven Snapshots:
+
+It indicates a current development copy. You should not give versions to projects which are still in development.
+
+Say project A is partially developed and you have give version 1.0. Project B is consuming Project A.
+When there is change in Project A versin changes to 1.1 so Project B also needs to be changed
+
+Prjoect A --> 1.0 
+Project B --> 1.0
+
+Change in Project A 
+Project A --> 1.1
+Project B --> 1.1
+
+So everytime Project A is changed Project B also needs to be changes. What happens if it is case for multiple modules are dependend on Project A.
+
+For that reason, Project which are on developement and not yet released are given SNAPSHOT version
+
+======================================================================================================
+
+Dependency Management:
+
+Project B depends on Project A, use the below dependency in project B . First install project A so it will be avaialable in local repo (.m2 folder)
+
+<dependencies>
+	<dependency>
+		<groupid> org.apache</groupid>
+		<artifactid>projectA</artifactid>
+		<version> 1.0.SNAPSHOT </version>
+			
+	</dependency>
+</dependencies> 
+
+
+========================================================================================================
+
+Multi Module Projects:
+--------------------------------------------------------
+
+Simple Project:
+
+Demo
+	src       -- all program files will be in one folder, so everytime we need compile files
+	target
+	pom.xml
+
+
+In Real time, you will not put all files in one folder
+
+Multi Module Projects
+
+Demo
+	add
+		src
+		target
+		pom.xml
+	sub	
+		src
+		target
+		pom.xml
+	div
+		src
+		target
+		pom.xml
+pom.xml
+
+
+Here you can consider add as one mini maven project, "sub" as one mini maven project and "div" as one mini maven project
+
+you can go into that particular folder add or sub or div and do build
+or you can build from parent folder Demo/ using the below command
+
+mvn clean -pl <modulename>
+
+Parent pom.xml
+---------------------------------------------------------------------------
+<groupid> org.apache</groupid>
+<artifactid>demo</artifactid>
+<version>1.0.SNAPSHOT </version>
+<packaging>pom</packaging>   ---------------> indicates that it is parent
+
+<modules>
+	<module>add</module>
+	<module>sub</module>
+	<module>div</module>
+</modules>
+	
+
+Now when you pass mvn package the same goal passes to all the modules
+
+
+
+Child Nodes: Need to provide GAV under parent tag in all the modules then only build order will be proper
+
+add - pom.xml
+<parent>
+<groupid> org.apache</groupid>
+<artifactid>demo</artifactid>
+<version>1.0.SNAPSHOT </version>
+</parent>
+
+sub - pom.xml
+<parent>
+<groupid> org.apache</groupid>
+<artifactid>demo</artifactid>
+<version>1.0.SNAPSHOT </version>
+</parent>
+
+div - pom.xml
+<parent>
+<groupid> org.apache</groupid>
+<artifactid>demo</artifactid>
+<version>1.0.SNAPSHOT </version>
+</parent>
+
+========================================================================================================	
+
+Deployments:
+
+
+Example- Deployment in JBOSS web server
+
+<build>
+	<plugins>
+		<plugin>
+			<groupid> org.jboss.as.plugins </groupid>
+			<artifactid> jboss.as.plugins </artifactid>
+			<version> 7.3.Final </version>
+				<configuration>
+					<jbossHome>path of jboss</jbossHome>
+					<serverName>default</serverName>
+					<groupid> groupid of the project </groupid>
+					<artifactid> artifactid of the projrect </artifactid>
+					<version> 1.0.SNAPZSHOT <version/>
+				</configuration>
+		</plugin>
+	</plugins>
+</build>
+
+mvn jboss-as:deploy --> deploys the application in jboss
+mvn jboss-as:undeploy --> undeploy the application in jboss
+
+
+Note: Here when you invoke jboss-as:deploy goal, it will execute all the phase because deploy phase is one of the default lifecycle in maven, so it will execute all the below phases 
+
+
+compile
+test
+package
+Deploy -- overwritten by jboss plugin
+
+However in other example mvn exec:exec, it executes only that plugin not other phases because exec is not part of the default lifecycle.
+
+==================================================================================
+
+Maven Update Version:
+-------------------------------------------------------------------------------
+
+mvn versions:set -DnewVersion=2.1.1
+	It creates backup pom file and replace version 1.0.SNAPSHOT to 2.1.1
+
+mvn versions:commit -- commits the released/freezed code to GIT
+
+mvn versions:revert -- reverts the changes made using versions:set, removes the backup and chnages version 2.1.1 to SNAPSHOT
+
+
+=================================================================================
+
+
+Maven Documentation:
+----------------------------------------------------------------------------
+
+mvn site --> generates documentation, you can in target--> index
+
+
+=================================================================================
+
+Settings.xml and pom.xml
+
+Settings.xml --> It is global config file, applies across all the projects
+pom.xml      --> Specific to that particular project
+
+Settings.xml - contains local repo info, authentication info, 
+
+Setting.xml will be avaialable in two places {maven.home}/config/setting.xml(global) and ${user.home}/.m2/setting.xml(user settings). 
+If both files present then their contents will be combined
+Preferance will be given to setting.xml in .m2
+
+
+Default Settings.xml
+
+<settings>
+<localRepository/> -- default to .m2
+<interactiveMode/>
+<offline/>
+<pluguinGroups/>
+<proxies/>
+<servers/>
+<mirrors/>
+<profiles/>
+<activeProfiles/>
+</settings>
+
+====================================================================================
+
+How do you store artifacts to repository manager
+
+Repository Manager: Sonatype Nexus
+	It is used to store artifacts, and it can act as a proxy to the internet. So it will not contact internet  
+
+
+Nexus Repo's;
+	1. Proxy - remote repository (in turn communicates with apache maven repo's)
+	2. HOsted(releases and snapshots) --> to store our artifacts
+	3. Group --  combination of multiple repos
+
+Now To store our artifact using maven follow thw below steps:
+
+1. pom.xml
+		<distributionManagement>
+			<snapshotRepository>
+				<id>nexus-snapshots</id>  -- Id in pom.xml and setting.xml should be same
+				<url>url of the repo</url>
+			</snapshotRepository>
+
+		</distributionManagement>
+2. Settings.xml
+
+		<server>
+			<id>nexus-snapshots</id>    -- Id in pom.xml and setting.xml should be same
+			<username>admin</username>
+			<password>admin123</password>
+		</server>
+---------------------------------------------------------------------------------------------------------
+Suppose you are using two repo's one for release and 2nd one for snapshot, how do you store artifact to those two repo's
+
+Here instead of creating profiles in settings.xml, give it in pom.xml and then try.
+
+Please try??????????????????????? 
+
+1.Settings.xml
+
+		<server>
+			<id>nexus-snapshots</id>    -- Id in pom.xml and setting.xml should be same
+			<username>admin</username>
+			<password>admin123</password>
+		</server>	
+
+		<profile>
+			<id>snaphot</id>
+			<repositories>
+				<repository>
+					<id>nexus-snapshot-repo</id>
+					<name>your custom name</name>
+					<url>url of the snapshot repo</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>release</id>
+			<repositories>
+				<repository>
+					<id>nexus-releaserepo</id>
+					<name>your custom name</name>
+					<url>url of the releae repo</url>
+				</repository>
+			</repositories>
+		</profile>
+2.pom.xml
+
+		<distributionManagement>
+			<snapshotRepository>
+				<id>nexus-snapshots</id>  -- Id in pom.xml and setting.xml should be same
+				<url>url of the snapshot repo</url>
+			</snapshotRepository>
+
+			<repository>
+				<id>nexus-snapshots</id>  -- Id in pom.xml and setting.xml should be same
+				<url>url of the release repo</url>
+			</repository>
+
+		</distributionManagement>
+==========================================================================================
+Transitive Dependencies:(When add dependency in your pom, that dependency will in turn download its dependendent jars)
+
+When you add junit dependency in your pom.xml, you could see hamcrest-core dependency also downloded because your project  depends on junit jar but junit jar needs hamcrest which it calls automatically
+
+==========================================================================================================
+Exclusions in Transitive dependent jar:
+<dependency>
+	<groupid> org.hibernate </groupid>
+	<artifactid> hibernate.core </artifactid>
+	<version> 7.3.Final </version>
+		<exclusions>
+			<exclusion>
+				<groupid> groupid of the dependency needs exclusion</groupid>
+				<artifactid> artifactid of the dependency needs exclusion </artifactid>
+			</exclusion>
+		</exclusions>
+</dependeny>
+=============================================================================================================
+
+Scopes in dependencies:
+test -- scope is reduced to test
+validate --  default
+runtime -- 
+provided -- used  when use interface the depencies will be decided during runtime
+
+===========================================================================================
+
+Dependencies Vs Dependency Management.
+
+<dependencyManagement> allows to consolidate all dependencies(used at child pom level) used across different modules
+<dependencyManagement> - can easily upgrade/downgrade dependencies based on need, otherwise this to be done every child pom
+dependencies provided in <dependencies> tag is always imported , while dependencies provided at 
+<dependencyManagement> in parent pom will be imported only if child pom has respective entry in its dependencies
+
+
+Useful in multi model project
+
+Parent POM:
+<dependencies>
+	<dependency>
+		<groupid>com.guava</groupid>
+		<artifactId>guava</artifactId>
+		<version>19.0</version>
+	</dependency>
+</dependencies>
+<dependencyManagement>
+	<dependencies>
+	<dependency>
+		<groupid>com.commons</groupid>
+		<artifactId>commons</artifactId>
+		<version>19.0</version>
+	</dependency>
+	<dependencies>
+</dependencyManagement>
+
+Child pom- module1
+
+<dependencies>
+	<dependency>
+		<groupid>com.commons</groupid>
+		<artifactId>commons</artifactId>
+	</dependency>
+<dependencies>
+
+Child pom- module2
+
+<dependencies>
+<dependencies>
+
+On running mvn dependency:tree
+
+guava is listed as dependency in all modules including parent(parent, module1 and module2)
+
+whereas commons is listed only in module1 and not even in parent
+
+-----------------------------------------------------------------------------------------------------------
+
+PluginManagement Vs Plugins
+
+It works the same way as dependencymanagement and dependencies

@@ -1,0 +1,152 @@
+Cloud --  buy resource from cloud provider and pay for what you use 
+
+On-Premise -- legacy way of bulding the infrastruture, here all servers are physically present
+
+
+
+Why AWS?
+AWS mainly developed as IAAS
+
+IAAS - Infrastruture as a Service
+Infrastructure means - compute,storage,networking and database
+100 + managed services  - PAAS(Platform as a service)
+
+Global Infra:
+--------------------------------------------------------------------------------------------
+Regions
+	Geographic location 22 regions, 3 US gov and 1 china
+---------------------------------------------------------------------------------------------
+Availability Zones- Group of data centers in a region
+
+Region(Mumbai):
+	AZ-1a,AZ-1b.AZ-1c
+
+Multi AZ - High Availability
+--------------------------------------------------------------------------------------------
+Edge Location - Cache contents
+
+CDN - Content Delivery Network - CloudFront in AWS
+
+Cloudfront is a CDN used in AWS
+
+--------------------------------------------------------------------------------------
+
+=========================================================================================================
+
+IAM: Identity and Access Management
+
+Authentication and Authorization service:
+
+Components:
+
+User
+Group
+Role
+Policy
+
+Users:
+	IAM
+	Federated Users
+		LDAP/Active Directory
+		External Ids - Facebook, Google
+	Root User - Got all permission, basically the one who creates the account
+
+Group:
+	multiple user : group level permission
+	user can belong to multiple group
+
+Role:
+	Authorizes AWS services
+
+	EC2(php)--> RDS(mysql)
+
+Here in the above example php code running in EC2 is trying to communicate to mysql in RDS.
+
+We need to authorize EC2 to communicate to RDS using ROLES
+
+Policies:
+
+	Policies are nothing but permissions. It is a JSON document
+
+{
+	Version:2010-09-17
+	Statement:
+		{
+			effect:allow/deny,
+			action:what action to perform(read/write,start instance),
+			resources:arn of the resource(Note: * means all resources)
+			principle:Not needed - if we attach policy to user then user is principal, if group then pricipal 						group
+		}
+}
+
+
+
+Note:Deny gets the high priority 
+
+Role:
+
+Creating Role:
+
+1. Select type of trusted entity(AWS Services/Another AWS account/Web Identity(Google/FB)/SAML(AD/LDAP))
+2. Select EC2 as per this example and give permission to access S3.
+
+Check Trust relationships--> Trusted entities is ec2.amazonaws.com
+
+
+=========================================================================================================
+EC2 - Elastic Compute Cloud
+
+RAM + CPU 	= Instance typw
+Storage   	= EBS/Instance Store
+OS		= AMI(Amazon MAchine Image)
+Network Card	= ENI Elastic Network Interface
+GPU
+Budget		= 5 pricing models
+
+AMI - template(OS,Application)
+ami - ubuntu+PHP+mysql
+custom ami - we can create our own AMI for our specific requirements
+
+	20 server need with  ubuntu + java + python
+
+	So here instead of installing java python and ubuntu in 20 machines, create a AMI and using that create 20 server, so installation time is saved
+
+
+Auto Scaling
+
+AMI - GOlden AMI, user are restricted to use only few ami's those are golden ami's
+
+INstance Type:
+
+	1.General Purpose-
+		Example : t2
+				t2.micro - 1 cpu, 1 GB ram
+				t2.nano	 - 1 cpu, 0.5 GB 
+				t2.small - 1 cpu, 2 GB
+
+	Note: You can easily change the instance type from say t2.small to t2.micro or something else
+		
+	2.Compute Optimized
+	3.Memory Optimized - Big Database, more input and output
+	4.Accelarated Computing - GPU, Gaming App's, Machine Learning
+	5.Storage Optimized - Throughput
+
+
+Storage:
+
+	EBS/Instance Store
+	Block Level Storage - Boot, Install app
+		Block Level storage helps in bootting the system and installing the apps.
+		It's like C drive in windows
+
+	Instance Store - non persistent data, means this data is temperaly stored, when machine reboots the data will be deleted
+	EBS- Elastic Block Storage - Persistent Data
+	
+
+=======================================================================================================
+
+
+VPC:
+
+Virtual Private Cloud
+

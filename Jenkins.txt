@@ -1,0 +1,720 @@
+Latest Version:??
+
+Study link: devopsschool.com/tutorial/jenkins
+Jenkoins.io
+
+What is continuous integration?
+	It is software methodology where we automate build, run test cases, deploy and then provide feedback to the developers.
+
+Mainly it is the integration of various tools
+GIT-SonarQube-Maven-Junit-Ansible-Selenium-Jacaco
+	
+	For every commit, it builds, tests and provides feedback. If there are any issues with build or test cases then mail will be triggered. whoever commited the code needs to have a look at it.
+
+What happens if build fails, will test and deploy happens?
+What happens if test fails , will deploy happens?
+===============================================================================================
+
+What is Jenkins
+It is continous integration tool developed based on java. It can be called as build tool,schedular, CI server.
+Other Tools:
+Bamboo,Teamcity
+
+
+=======================================================================================
+Jenkins set up using AWS:
+
+Master:
+Launch EC2 instance(Jenkins-Master) --> Install java, Jenkins
+		Take the EC2 instance ip and access it in your machine, you can access jenkins UI.
+
+Remember when you login to jenkins it will install necessary plugins but it will not install that software in the Ec2 Instance.
+
+Say GIT plugin will be available in JEnkins but not available in EC2 instance, you will install it
+
+Slave:
+Launch EC2 instance(Jenkins-Slave) --> Install java --> No need to install jenkins
+
+
+	
+
+Jenkins User:
+cat /etc/passwd -- to know jenkins user
+
+Check jenkins entry in sudoers file - google file  ---> vi /etc/sudoers
+
+Why sudoers file needs to be configured????
+
+
+============================================================================================
+Jenkins Features
+
+OpenSources
+Large community support
+Easy setup
+GUI
+1400+  plugins, you can write your own plugin.
+Distributed.(Master and Slave)
+Flat file system(based on XML)
+
+=================================================================================
+Installation:
+Need JDK and Application Server like Tomcat, JBOSS
+
+you can .war file and put it in the root folder of application server. And there are many ways also like docker image, etc
+==================================================================================
+Jenkins Plugins
+
+By default Jenkins comes up with some basic plugins like shell, etc. 
+BUt if you need any other plugins, search for it,install,configure.
+
+For a CI pipeline, we need the following the plugins
+CI Pipeline:
+Checkout Source Code --> git/SVN/perforce/TFS
+Build- Maven/Gradle/Ant
+Deployment - shell(defult)/ansible/puppet/chef..etc
+Test - Junit 
+Notification - Email/slack/skype
+
+============================================================================================
+Sample Project: Lifecycle
+
+
+demo.java --> maven(continuos integration) --> Junit --> run static code analysis(sonar cube) --> jar/war --> deploy to dev --> integration env --> Acceptance(continuos integration) -->  manual approval(continuos delivery) --> deploy to prod(Continuous delivery)
+
+Developer --> GIT --> Build --> Test --> Docker --> Monitor(Nagios) - Prod
+	 <----  CI     ------------>     <------  CD   ------------------>
+
+Before moving to production we need manual approval, however when there is no approval needed, then automatically moved to production, That is called continuous deployment
+
+What is CI??
+
+It is a development practice that requires developers to integrate code into a shared repo several times a day. Each check-in is then verified by an automated build, allowing teams to detect problems early
+
+
+Differance Between Continuos Delivery and Continuos deployment ??
+
+COntinuos Deployment - No manual intervention, automatically deployed to production
+Continuous Delivery  - Manual approval are required to move to prod
+-----------------------------------------------------------------------------------------
+Webhook????
+CRON ????
+
+Jobs:
+1.Freestyle
+2.Pipeline
+
+Each Job has five sections:
+1.General
+	Discard build -- > you can keep only certain no of builds, other old builds will be discarded, this helps disk space
+	Add Parameter -->  Say you want to dynamically pass branch or version, explore more
+2.Source Code Management
+	GIT or SVN etc
+3.Build Triggers
+	Build Peridically(CRON)(Scheduling)
+	GitHub hook trigger for GITScm polling - triggers job when code is commited in GIT
+	Poll SCM(CRON)(Checks GIT or SVN periodically based on CRON configirations and if there is any commit then job will be triggered)
+4.Build Environment
+5.Build
+	Maven, ANT, Gradle, Winfows batch command, Shell command(shell commands like mkdir etc)
+6.Post Build Actions
+	Kick off another job or trigger mail
+
+====================================================================================================
+Note: 
+Jenkins Workspace - var/lib/jenkins
+You can see workspace in jenkins UI or go to var/lib/jenkins
+
+How do you copy job from another job?
+Give new job name and There is "copy from" field specify old job name which you want to copy
+
+-----------------------------------------------------------------------------------------------------------
+GLOBAL TOOL CONFIGIRATION:
+How Jenkins installs softwares like maven, GIT etc?
+
+In Jenkins, Manage Jenkins --> Global Tool Configirations -->  Specify the required tools --> check install automatically
+
+
+Plugins:
+Manage Jenkins--> Manage Plugins
+
+Build Pipeline Plugin --> Required for Pipeline jobs
+===============================================================================================
+
+Sample JObs:
+
+1.p-build - just retrieves the code from GIT and saves in Jenkins workspace.(/var/lib/jenkins/workspace/p-build)
+2.p-compile - Compiles the code
+3.p-test - in Post build action --> Publish Junit test result report
+		Mention where is your surefire test report --> target/surefire-reports/*.xml
+		You could see Latest test results under workspace
+4.p-package - used to package jar/war.
+5.p-dev     - deploy to dev 
+
+
+After all three jobs ran successfully, we need to create Pipeline View
+
+To create pipeline view, click on the '+' symbol(remember to install Build Pipeline Plugin)
+
+1.give name and select build pipeline view
+2.Configirations like Initial job to run.
+3.Do configiration on p-build job like Add post build action--> Build other projects --> give 2nd job (p-compile)
+4.Do configiration on p-compile job like Add post build action--> Build other projects --> give 3rd job (p-test)
+5.Now if you see the pipeline, all three jobs will be linked with the order
+
+
+Jenkins Jobs
+	Build Pipeline job
+	Cron
+	poll scm
+=============================================================================================
+SonarQube integration with Jenkins 
+
+
+============================================================================================== 
+Jenkins administrationn
+	Configure System
+	Global admin tool
+	Manage plugin
+=======================================================================================================
+How to Configure tools
+GLOBAL TOOL CONFIGIRATION
+============================================================================================
+Manage Users
+
+==========================================================================================
+Backup Jenkins
+	1.Thin Backup
+	2.Periodic Backup
+
+Suppose you are migrating from one jenkins server to another, then if you have backup you can retrieve the old configiration details like plugins and other details to the new server
+
+========================================================================================
+
+
+Master Slave Distribution Jenkins:
+
+Make sure Configure Global Security -->  Agent --> Random(runs on any open port)
+Using Linux:
+In Jenkins UI, Add node--> give name and select permanent agent--> give remote directory(root/jenkins-slave-home)
+--> labels --> ex. slaves(groups the nodes) this you will specify in job configiration
+--> Host- root@ip-of-slave (ip of slave) --> launch method(launch agents via ssh) --> Add private key -->
+--> In the job, Restrict where this project can be run and give label expression (This will prevent job running in master and runs in nodes specified in labels
+
+When Select Launch method "Launch agent by connecting to master" click on slave node --> click on launch and agent.jar
+--> Give the command mentioned in Agent in Slave machine so master and slave will be connected
+
+.jlnp and agent.jar will be downloaded. These two files needs to be present in slave machine. Suppose these files is in windows machine and you need to move to slave which ubuntu or something . Use WINSCP tools to move the files
+
+for connecting use .pem file generate ppk file using putty 
+
+Download .jnlp and agent.jar file
+
+NOte: Private key needs to be added in credential section in jenkins
+
+In Master 	-->  ssh-keygen -t rsa  -- generates public/private key pair
+		-->  cat ~/.ssh/id_rsa.pub -- to view public key
+		-->  ssh ip of slave --  ssh into slave(now you are in slave machine from master termninal)
+		-->  mkdir jenkins-slave-home   -- creates directory in slave root folder. this will give in slave config 
+		-->  cat ~/.ssh/id_rsa        -- to view private key   		
+
+In Slave 	--> vi ~/.ssh/authorized_keys  --  adds key generated in master
+
+
+
+Using Windows 
+
+
+========================================================================================================
+
+Use Cases:
+
+Docker Machine(Web server)
+1.Install Apache
+2.opy file from github to docker machine /var/www/html folder
+3.CReate docker image
+4.Run the image on port 80
+
+It is acheived in the following way.
+
+First make sure your system has docker installed. If not install it.
+Create docker file with steps to install apache, copy the file from current directory to /var/www/html
+In the jenkins job, under build give the below commands.
+
+cd /var/lib/jenkins/worspace/githubjob --> changes to workspace where git project is downloaded 
+sudo docker build . -t myimg     - creates docker image using docker file in the current directory(.)
+sudo docker run -it -p 82:80 -d myimg --  runs the image (what is 82:80 ????)
+
+Now access it using 'ip address':82 
+
+=================================================================================================
+
+WebHook:
+
+It is used bind GIthub and Jenkins
+
+Go to github repo and setting --> WebHook --> Add WebHook --> Give Jenkins Master url(jenkins-master:8080/github-webhook)
+
+And in Build Triggers, select Github hook trigger for gitSCM polling
+============================================================================
+
+
+Things to considers:
+What is the technology?
+	Java/Dotnet/Python/ruby
+
+What is the build tools?
+	Maven/Gradle/MSBuild
+
+Maven 	pom.xml			goal
+Ant   	build.xml		target
+Gradle 	gradle.xml		Tasks
+msbuild	default.msbuild		target
+
+Where is the Source Code?
+	GIT/SVN/Per4
+
+How often this job to be triggered?
+
+@Hourly
+
+Whom you want to be notified?
+
+Refer the below link for various techologies:
+https://devopsschool.com/path/
+---------------------------------------------------------------------------
+Scheduling using Jenkikns:
+
+1.On Specific time --> Build Periodically
+2.Trigger a job from remote location --> Trigger build remotely
+	Refer --> www.scmgalaxy.com/tutorials/how-to-trigger-builds-remotely-in-jenkins/
+
+	Step1 : Enable "Trigger build remotely"
+	Step2 : Create a Jenkins URl for the trigger, The sample format will be given when you enable Trigger build remotely option
+	Step3 : Replace the sample URL with the actual one
+
+		JENKINS_URL/view/job/job3/build?token=TOKEN_NAME
+		http:12.34.23:8080/view/job/job3/build
+		http:12.34.23:8080/view/job/job3/build?token=7168471987 --> token is optional
+
+	Step4 : Add token in Autorization token -- IF you add this token then you need to provide the token in the URL
+	Step5 : curl -X POST http://Uday:usertoken@12.34.23:8080/view/job/job3/build?token=7168471987
+
+Here CUrl or Wget can be used
+
+CUrl needs your user token, you can generate user token, User--> configure -- > API Token
+
+3.Build after other projects are built
+4.Poll SCM --> Poll SCM at certain time but build will happen only when there is any changes in SCM or any new commits
+5.GitHub Hook Trigger for GIT SCM polling
+	Refer --> www.scmgalaxy.com/tutorials/how-to-build-when-a-change-is-pushed-to-github-in-jenkins/
+		  www.scmgalaxy.com/tutorials/build-when-a-change-is-pushed-to-bitbucket/
+
+Steps: 	
+	Step1 : Install the github jenkins plugin
+	Step2 : Configure the github plugin with github accounts and token
+
+		Go to Configure System --> Add Github server --> api.github.com(default) --> Generate Token(GO to Github, Setting, Developer Setting, Personal Access Token, Generate token, GIve access, ) --> Add the generated token-- Secret Text
+	Step3 : Configure the jenkins job you want to trigger(just give git url)
+	Step4 : Configure wobhook on github for the specifi repo
+Webhook url example : http://23.34.23.134:8080/github-webhook/
+
+========================================================================================================
+Software Development Models Evolution:
+Waterfall  --> Agile  --> Devops
+
+Software Development Architecture:
+Monolithic(One software ) --> Service oriented Architecture(SOA) --> Microservices
+
+====================================================================================================
+
+SDLC:
+Plan --> Code  --> Code Review (SCA Tool) --> Build --> Unit Testing --> Package --> Archieve --> 	Dep2QA -- >Test
+(jira)   (GIT)     (SonarQube)                (Maven)   (Junit)          (.jar/war)  (Nexus/Artifactory)(Puppet/Anisble)
+
+--> COde Coverage --> 
+    (Jacaco)
+
+==========================================================================================
+Dep2QA Scenario:
+--------------------------------------------------------------------------------------------
+1 deployment -  9 min
+100 deployment --  900 min -- wrong wrong
+100 deployment --  9 min --> Right Right
+
+How to achieve this?
+You can achieve using parrallel deployment using Ansible,Chef and Puppet.
+
+Code --> Anisible, Chef and Puppet
+GUI  --> Octopus Deploy, Udeploy
+
+Suppose 1000 deployments in a second.
+
+It is possible using Docker/Kubernates
+================================================================================================
+
+What are the other tools?
+Teamcity --> Bamboo --> Ubuild --> TravisCI
+
+===============================================================================
+Jenkins Architecture:
+
+It consists of two parts
+	
+	1. Front End -  Web UI(We use it configure, create jobs,etc)
+	2. Back End  -  Node (Master) -- It is a default node
+
+
+Jobs will be executed in master node
+
+==================================================================================
+
+Install Plugins  	-- Plugins Manager
+Install Tool     	-- Global Tool Configiration
+Config Tool/Plugin 	-- Configure System
+
+==============================================================================
+
+Feedbacks:
+
+------------------------------------------------------------------------
+
+	1 . Email
+		Basic 		- Mailer Plugin  		--  Email Notification
+		Advanced 	- Email Extension Plugin	--  Editable Email Notification
+	
+	2 . Chat
+		Jabbar
+		Cisco
+		Slack
+		Skype 
+			Step1 -  Install plugin
+			Step2 -  COnfigure plugin
+			Step3 -  Use plugin in the job 
+	3 . Pager
+	4 . Dashboard AKA PIPELINE
+=====================================================================================
+
+
+How do you get the details of any jobs using Linux commands
+
+You can use GET method to get the details of the job, just give the url of the job and append /api
+
+---------------------------------------------------------------------------------------------
+=====================================================================================
+INTEGRATION OF TOOLS:
+=====================================================================================
+------------------------------------------------------------------
+
+Setting up 3 tools using Docker:
+--------------------------------------
+
+	1. Jira
+		docker volume create --name jiraVolume
+		docker run -v jiraVolume:/var/atlassian/application-data/jira --name="jira" -d -p 8080:8080 atlassian/jira-software
+		Access using  ip of the machine:8080 
+	2. SonarQube
+		docker run -d -p 9000:9000 sonarqube
+		Access using  ip of the machine:9000
+	
+	3. Artifactory
+		docker login -u scmgalaxy -p 2872893728937927 jfrog-docker-reg2.bintray.io
+		docker run -d -p 8081:8081 jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:6.1.0
+		Access using ip of the machine:8081
+
+
+How to integrate any tool in Jenkins?
+	Install plugin
+	Configure plugin
+	Use plugin in Job
+=================================================================================================================
+Case1:Integration with JIRA
+
+Whenever we have a failed  job - new ticket should be created and assigned.
+
+1. Install JIRA plugin(JIRA Plugin)
+2. Configure Plugin
+	URL: ip of the machine:8080 --  where JIRA is runing
+	Link URL : ip of the machine:8080
+	Use HTTP authentication instead of normal login
+	Add Credentials
+
+
+Note: SOmetimes you face issue in adding credentials in Configuring plugins, it is bug in Jenkins open source . So go to CRedentials and add the credentials
+
+3. Use plugin in job
+	In Post build Actions, select Jira-Create issue
+	--> Jira project key --> Create a project in jira web UI and get the Key. Give that key in Jenkins
+	--> Issue Priority  --> Highest/Medium/Low -- Choose from drop down
+	--> Issue Type      --> Story or epic /something
+
+So whenever the job fails, a ticket will be created in JIRA	
+====================================================================================================================
+
+Case2 : Integration with SonarQube
+
+	- SonarQube Server --  COnfig System --> Give the URL/IP --> Token 
+	- Code
+	- Scanner
+		Plugin - SonarQube Scanner
+		Global Tool Config - To install Scanner
+		
+Build --> Execute SonarQube Scanner --> Build JOb --> In the workspace, check SonarQu be for the report
+
+Note : This is a simple approch, we need to learn integration of Maven with SonarQube
+
+=====================================================================================================================
+
+Case3 : Integration with artifactory
+
+	1.Install Plugin --> Artifactory Plugin
+	2.Config System  --> Give Artifactory url and username and password
+	3.Locate Repo , GAV --> Repo of the project(URL), GAV from code
+		In Build Environment - Select Maven3-Artifactory Integration - In Artifactory Server, give Repo Artifactory URl --> Refresh Repositories --> 
+	4.Goal           --> Deploy
+	5.Use Plugin in JOb
+If any issues with the Build, then check pom.xml (distribution management) and setttings.xml(user and password)
+
+
+
+Integration with Nexus???
+
+===============================================================================================
+
+Case4 : Integration with Junit
+
+	1. Post build - Publish Junit reports
+	2. target/surefire-reports/*.xml
+
+So the reports will be displayed  under workspace 
+
+==============================================================================================
+
+Case5 : Integration with Package
+	
+	Post build Actions --> Archieve the artifacts --> target/*.jar
+
+=============================================================================================
+
+Case6 : Integration with Jacaco -- Code Coverage
+
+	Step1. Make sure Jacaco plugin is included in pom.xml under <build>
+	Step2. Install Jacaco plugin in jenkins
+	Step3. mvn install(JAcaco will invoke afte mvn package, so mentioned install goal)
+	Step4. Post build action --> Record Jacaco coverage report
+
+
+============================================================================================
+
+Pipeline View / Dashboard
+-------------------------------------------------------------
+
+Plugins -  1. Build Pipeline -  No scriting required, but it is the old way(Not recommended)
+				Helps in visualizing pipeline dashboard
+		or
+	   2. Pipeline  -- Scripting required -- recommended way
+
+Pipeline Template:
+--------------------------------------------------------------
+Phase1 --> Phase2 --> Phase3
+Step1      Step1      Step1
+Step2      Step2      Step2
+Step3	  	      Step3
+		      Step4
+
+
+
+In Old Pipleline using Build Pipeline, Job configiration needs to be done which is hectic because there might lots of steps involved in it. 
+
+To avoid that we are going for new approach, that is pipeline scripting
+
+Pipeline scripting is done using Groovy.
+
+You write in line scripting or you can use Jenkins File
+
+Sample pipeline scripting:
+-----------------------------------------------------------------------------------------
+pipeline{
+	agent any
+	tools {
+		maven "M3" -->  Golbal Tool Configiration in GUI
+	}
+	stages{
+		stage('Compile'){
+			steps{
+				git 'repo url'
+				// Run maven on unix agent			
+				sh "mvn -Dmaven.test.failure.ignore=true clean compile"
+				// To run maven on windows
+				//bat "mvn -Dmaven.test.failure.ignore=true clean package"
+				
+  			    }	
+			}
+		stage('Test'){
+			steps{
+				git 'repo url'
+				// Run maven on unix agent			
+				sh "mvn -Dmaven.test.failure.ignore=true clean test"
+				// To run maven on windows
+				//bat "mvn -Dmaven.test.failure.ignore=true clean package"
+  			    }	
+			post {  --------------------------------> Post build action in GUI
+				success{
+					junit '**/target/surefire-reports/TEST-*.xml'
+					archieveArtifacts 'target/*.jar'			
+				}
+			}
+		stage('Test'){
+			steps{
+				git 'repo url'
+				// Run maven on unix agent			
+				sh "mvn -Dmaven.test.failure.ignore=true clean test"
+				// To run maven on windows
+				//bat "mvn -Dmaven.test.failure.ignore=true clean package"
+  			    }	
+			post {  --------------------------------> Post build action in GUI
+				success{
+					junit '**/target/surefire-reports/TEST-*.xml'
+					archieveArtifacts 'target/*.jar'			
+				}
+			}
+	stage('Deploy'){
+			steps{
+				git 'repo url'
+				// Run maven on unix agent			
+				sh "mvn -Dmaven.test.failure.ignore=true clean deploy"
+				// To run maven on windows
+				//bat "mvn -Dmaven.test.failure.ignore=true clean package"
+ 			    }	
+			post {  --------------------------------> Post build action in GUI
+				success{
+					archieveArtifacts 'target/*.jar'			
+				}
+			}		
+	}
+}
+
+
+============================================================================================================
+ Where u can learn to writre scripting?
+
+search in google "jenkins pipeline book" --> Pipeline-Jenkins
+https://github.com/devopsschool-sample-programs/jenkins-groovy-scripts-collection
+https://github.com/devopsschool-sample-programs/jenkins-jenkins-jenkinsfile-example-collection
+
+
+=========================================================================
+
+Different Jenkins:
+
+Jenkins - Community
+Jenkins - Cloudbees (enterprice)
+Jenkins - blueocean
+Jenkins - jenkins x
+==========================================================================
+
+Jenkins Authentication and AUthroization:
+--------------------------------------------------------------------------
+Use Configure Global Security  for authentication and authroization
+
+Authentication:
+Username and paasword using Jenkins DB
+LDAP
+
+Authroization:
+Matrix based security (System level) (Be careful on this)
+Project based matrix authorization(Project or folder level)(Be careful on this)--> Enable project based security in the job
+
+
+Manage User -- You can add new user 
+
+============================================================================
+
+Master and Slave:
+
+By default master node will be there, job will run one by one.
+
+You can run the jobs parallely by configuring no.of.executors in configure system. But this will result in performance issue on master node. 
+
+To overcome the problem, we are going for Slave machines
+
+
+Parallel Executions achieved using:
+
+1.No of executors -- this solves problem patially say the below situation
+			
+		two developers commit the code they are using the same job and same workspace, in that case even though you are using no-of executors to 2, you cannot execute it parrallely.
+
+In that situation you go for execute concurrent build option
+
+2.Execute concurrent builds if necessary --> enable it in the job
+	--> workspace will be different 
+		--> /var/lib/jenkins/workspace/job10
+		--> /var/lib/jenkins/workspace/job10@2
+
+Concurrent option makes use of different workspace so it can able to achieve concurreny
+
+
+Best way is to add Nodes
+
+How to add Buld Nodes?
+==================================================
+
+Add Manual Virtual workstations.
+Add in Cloud(AWS)
+Add in container
+
+Add a Node
+-----------------------------
+	Linux
+		1. Install JDK
+		2. Go to Jenkins -- Manage Nodes --> Permanent Agent --> Remote root directory --> Launch agents via SSH --> Host(ip address) --> Keys(Provide key from .pem file)--> Give Non verifying verification strategy
+		In the job --> select restrict where this project can be run --> provide labels
+
+After if you check the temp directory, you could see the remoting.jar, if it is runnning then jenkins and that node is connected
+
+
+	Windows
+		1. Install JDK
+		2. Go to Jenkins -- Manage Nodes --> Permanent Agent --> Remote root directory --> Launch agent by connecting it to master --> After selecting Random as below --> Save --> Launch Agent --> Download agent.jar file in the directory that we specified and open the cmd from that directory and give the command given in the jenkins
+
+Noet:agent.jar file should be present in Slave windows machine
+
+Make sure --> Config Global Security --> Agent allows TCP inbound --> Random is seleted or not
+
+		In the job --> select restrict where this project can be run --> provide labels
+
+Note : The agent.jar command gives incorrect Jenkins ip, check that and if you want to change the corerct one -->
+		Goto --> Configure System --> Jenkins URL --> Give the correct one
+
+
+Lables:
+-------------------------------------------------
+
+In the labels you can give like 
+	1. linux all
+	2. win all
+
+so label 'all' have 2 machine
+
+and 'linux' has 1 machine and 'win' has 1 machine  
+
+ 
+
+=================================================================== --=================
+
+Jenkins Backup and Restore
+---------------------------------------------------------------
+
+Jenkins saves everything in XML, if you taken JENKINS_HOME backup and then that is your backup
+
+Thin Backup plugin
+
+It gives Three options
+
+1. Backup Now
+2. Restore
+3. Settings
+
+Step1 : Install Thin Backup plugin
+Step2 : Manage Jenkins --> Thin Backup --> Settings(One time setup) --> Provide backup directory

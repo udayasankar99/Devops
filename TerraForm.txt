@@ -1,0 +1,891 @@
+Terraform:  (Extension .tf)
+====================================================================
+
+It is primarily used to create cloud infrastructure and also it manages the infrastructure.
+
+Multicloud provising on your infrastruture
+
+Use infrastructure  as code to provision and manage any cloud, infrastruture, or service.
+
+It is IAAC tool, used to build, change and version control your infrastruture
+===========================================================================================
+
+Why we need Terraform?
+Say if you only 1 or 2 EC2 instances then you cna manage manually easily. But in the real time yoiu will be having large no.of servers. So it would be difficult maintain that instances or infrastructure. So you can use tool like Terraform here.
+=============================================================================================
+
+Terraform Alternatives?
+
+Cobbler, Foreman, CloudFormation
+
+When VM are ready then only Ansible.Chef and puppet will come into play. 
+
+=======================================================================================
+
+What IAAC?
+
+Infrastruture as a code- It is blueprint of your infrastrutre. You can recreate your infrastruture at any given point in time
+
+=====================================================================================================
+Search Terraform sample templates in google  ----> 
+
+
+==========================================================================================
+
+Terraform Language:
+GO
+
+================================================================================
+
+Terraform COnfig files:
+-------------------------------------------------------------------------------------
+
+*.tf files
+*.tfvars
+
+HCL --> Hasicorp Language -- means the . tf files syntax is similar to JSON but it is not exactly it. They built on top JSON 	but it HCL
+
+
+
+=============================================================================================
+Installation of terraform:
+Download link : https://terraform.io/downloads.html
+
+Download terraform file. Keep it in C: folder.
+
+Set path using cmd.
+
+check  terraform --version 
+
+That's it !!!!!!!
+
+===============================================================================================
+
+Terraform commands:
+
+terraform --version
+terraform --help
+terraform fmt --> enable standarization which automatically updates configirations in the current directory for easy 		readability and consistemcy
+		basically it formats *.tf file
+
+terraform validate --> it will check and report errors within modules,attribute names and value types 
+terraform show     --> once after terraform apply, you can use this command to display the attribute values
+terraform state    --> when user need to modify the state file by finding resources in terrafrom.tfstate file withv terraform 			state list. This will give list of resources as address and resources ID's that we can then modify
+
+terraform workspace --> Creates different workspaces and helps in workspace management
+			terraform workspace new dev   	--> creates dev environment
+			terraform workspace new test	--> creates test environment
+			terraform workspave select test --> selects environment
+
+
+It manages different environmwents --> So you can maintain different state files for diff env in S3
+
+terraform providers  -->  it gives provider info
+
+
+Workflow commands:
+-------------------------------------------------------
+terraform init -- in your working directory, if you give init, it will find *.tf file and then it will download plugins 			required for the template.(i.e it will download plugins based on provider in .tf file)
+		
+		It also creates .terraform folder, under that folder, all your pluigns will be downloaded
+
+	init --> *.tf --> provider --> Hasicorp plugin api --> Local
+
+terraform validate  --  to check any syntactical error
+ 
+terraform plan --  it is a kind of dry run on the template to see what eactly happened.
+
+		Before applying changes, it will show the execution plan
+ 
+terraform apply -- creates actual cloud resources. It checks if state file is present or not. If state file is not present it 			will create, otherwise keep the existing file
+
+terraform destroy --> It will remove/ delete all the infrastruture created
+
+
+
+==========================================================================================
+
+Workflow:
+
+A simple workflow for deployment  will follow closely to the steps below.
+
+	1. Scope- Confirm what resources needs to be created for a given project
+	2. Author- The person who creates the infrastructure - configiration file in HCL on the scoped paramaters
+	3. Initialize- Run 'terraform init' in the project directory with the configiration files. This will download the 			correct provide plugin for the project/ template(*.tf)
+	4. Plan and Apply - Run 'terraform plan' to verify creation process and then 'terraform apply' to create real 	resources as well as state file that compares future changes in your project
+
+terraform plan sample results:(Dry run shows what are the resources goin to get created and other details)
+============================================================================================
+#aws_instance.example will be created
++ resource "aws_instance" "example"{
+  +ami				=	"ami-121433"
+  +arn				=	(known after apply) or <computed>
+   etc
+}
+
+Note: + means create
+
+}
+
+Advantages:
+------------------------------------------------------------------
+
+1. Platform Agnostic - works for all cloud providers
+2. State Management
+	Terraform creates a state file when a project is first initialized. It uses this local state  to create plans and make changes to your infrastruture. Prior to any operation. Terraform  compares the changes made to the infrastructure/ resources with the state file and revert those changes
+	
+3. Operator Confidence
+	terraform plan --> help in dry run so it will not cause any disruption the existing instance or environment.
+Optionally, the plan can be saved to a terraform plan file, and apply can take this plan file to execute this plan exactly
+
+
+State File:
+When you do init , state file also will be created. It helps in keep track of the infrastruture created.
+ 
+Say you have created infrastruture using terraform, tomorrow someone changes some configiration then this state file compares the infrastructure and finds the changes
+
+terraform.tfstate --> this is the file created after init. If you open the file you could all the attribute details with which the infrastruture got created.
+
+
+terrafrom.tfstate --  current state
+terraform.tfstate.backup - previous state
+
+It maintains the current instance information
+================================================================================================
+
+Documentation:
+------------------------------------------------------------------------
+terraform.io/docs/providers/aws/index.html
+======================================================================================
+
+Build Infrastruture:
+------------------------------------------------------------------------------------------
+
+Prerequiste:
+AWS CLI needs to be present
+
+================================================================================================
+Basic_Ec2_Instance.tf
+---------------------------------------------------------------------------------------------
+provider "aws"{
+	profile = "default"
+	region  = "ap-south-1"
+}
+resource "aws_instance" "example" {
+	ami	=	"ami-0n393n348sd9"
+	insance_type = "t2.micro" 
+}
+
+Example1:
+
+provider "aws"{
+	region = "us-east-1"
+	access_key = "sdsadsa"      ----> Get it from IAM
+	secret_key = "adasdsadsa"   ----> Get it from IAM
+}
+
+resource "aws_instance" "First_Instance"{
+	ami		 	= "ami-jg87yssd"
+	instance_type 		= "t2.micro"
+}
+
+Managing Credentials:
+-----------------------------------------------------------------------
+1. export/set environment variables
+	set AWS_ACCESS_KEY = ljakdasdas
+	set AWS_SECRET_ACCESS_KEY = jna987dsad
+
+provider "aws"{
+	region = "us-east-1"
+		-----------------------------> No need to specify creadentials because we have configured it in environment
+	}
+
+resource "aws_instance" "First_Instance"{
+	ami		 	= "ami-jg87yssd"
+	instance_type 		= "t2.micro"
+}
+
+2. aws configure
+	credentials file under .aws directory
+
+Example2:
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+resource "aws_instance" "web" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+
+  tags = {
+    Name = "HelloWorld"
+  }
+}
+
+=========================================================================================
+Resource Dependencies
+-------------------------------------------------------------------------------
+Assigning an Elastic IP:
+--------------------------------------------------------------------------------
+resource "aws_eip" "ip"{  --> creating elastic ip with name as ip
+	vpc=true          --> VPC is already present
+	instance=aws_instance.example.id --> associating with EC2 instance
+}
+
+
+Here Ec2 instance is the dependency
+
+Implicit and Explicit Dependencies:
+===========================================================================================
+Implicit dependency
+-------------------------------------------------------------------------------------------
+	The example showed above is example for implicit dependency
+
+Explicit dependency
+-------------------------------------------------------------------------------------------
+	A resource will be created only after creation of another resource.
+
+Example:
+-------------------------------------------------------------------------------------------
+resource "aws_s3_bucket" "example" {
+  bucket 	= "bucket-name"
+  acl 		= "private"
+}
+
+resource "aws_instance" "example" {
+	ami	=	"ami-0n393n348sd9"
+	insance_type = "t2.micro" 
+
+	depends_on  = [aws_s3_bucket.example]   -----> explicitly mentioning dependency on S3 bucket 
+}
+
+-----------------------------------------------------------------------------------------------
+
+
+Non-Dependent Resources:
+----------------------------------------------------------------------------------
+
+The resources which are not dependent on any other resources are called non-dependent resources.
+These resources will be created in parrallel to other resources mentioned in *.tf file
+ 
+resource "aws_instance" "example" {
+	ami	=	"ami-0n393n348sd9"
+	insance_type = "t2.micro" 
+
+}
+ 
+================================================================================
+Provision:
+
+It helps to do basic set up / configirations in the resources.
+
+
+Defining a provisioner:
+
+Local-Executor:
+---------------------------------------------------------------------------------------------
+resource "aws_instance" "example" {
+	ami	=	"ami-0n393n348sd9"
+	insance_type = "t2.micro"
+
+	provisioner "local-exec" {  --> execute locally on the machine running terraform
+	   command = "echo ${aws_instance.example.public_ip} > ip_address.txt"  -->  This command will execute once the 											instance is created
+	} 
+
+}
+
+Remote-Executor:
+------------------------------------------------------------------------------------------
+
+resource "aws_key_pair" "example" {
+	key_name = "examplekey"
+	public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_instance" "web"{
+	key_name = aws_key_pair.example.key_name
+
+	connection {
+		type = "ssh"
+		user = "root"
+		private_key = file("~/.ssh/id_rsa")
+		host    = self.ip
+	}
+	provisioner "remote-exec"{
+		inline = [
+			"sudo amaxon-linux. enable",
+			"sudo yum -y install nginx",
+			"sudo systemctl start nginx"		
+			]
+	}
+}
+
+
+==========================================================================================================
+
+Input Variables:
+============================================================================
+
+Interpolation  --> ${}
+
+1.String
+	ami_id = "ami-12m881n8d"
+2.List
+	regions = {us-east-1,us-east-2}
+3.Maps
+	sf = {
+		"small-plan"  = "1CPU, 2GB"
+		"medium-plan" = "2CPU, 4GB"
+}
+
+Define Variable:
+-----------------------------------------------------------------------------
+
+variable "region"{
+	default = "us-east-1"              -----------------------> you can overide the value in apply
+}
+
+================================================================================
+
+
+Using variable in COnfigiration:
+-----------------------------------------------------------------------------------
+
+provider "aws"{
+	region = var.region
+}
+
+====================================================================================
+
+Assigning Variables:
+-------------------------------------------------------------------------
+
+There are multiple ways to assign the input
+
+1.Command-line flag:  -------------> You use this along with apply, plan and refresh
+	terraform apply\
+	-var 'region=us-east-2'
+
+2.From a File:
+
+	You can define variables in a file called *.tfvars and also you can define variables in var.tf file
+	Define 'region=us-east-2' in *.tfvars file
+	
+	Pass those variable like below.
+	
+	terraform apply\
+	-var-file="secret.tfvars"\
+	-var-file="production.tfvars"
+
+3.From environment variable:
+
+	These variable come as part of terraform, example TF_VAR_region, is region variable in terraform
+==========================================================================================
+	
+Lists:
+
+variable "cidrs" {default = []}
+
+or
+
+variable "cidrs" {type = list}
+
+cidrs = {"10.0.0.0/16","10.1.0.0/16"}
+=====================================================================================
+
+Maps:
+-------------------------------------------------------------------------------------
+variable "amis" {
+	type = "map"
+	default = {
+		"us-east-1" = "ami-b34676"
+		"us-west-2" = "ami-5jhb76"
+	}
+}
+
+resource "aws_instance" "example"{
+	ami = var.amis[var.region]
+}
+=====================================================================================
+
+Assigning Maps:
+
+terraform apply -var 'amis={us-east-1 = 'foo', us-west-2 = 'bar'}'
+
+======================================================================================
+
+
+Output Variables: --> Helps to get info about your infrastruture after deployment
+-------------------------------------------------------------------------------------
+
+out.tf
+
+output "ip" {
+	value = aws_eip.ip.public_ip
+}
+
+=======================================================================================
+
+Variable Example:
+
+provider "aws"{
+	region=${var.region_name}
+}
+
+resource "aws_instance" "aws_var_instance"{
+	ami			=	${var.ami}
+	instance_type		=	${var.instance_type}
+	vpc_security_group_ids	=	["${aws_security_group.allow_ssh.id}"]
+	key_name		=	"test_key"
+}
+
+resource "aws_security_group" "allow_ssh"{
+	name			=	"allow_ssh"
+	description		=	"allow ssh traffic"
+	
+	ingress{
+		from_port	=	22
+		protocol	=	"tcp"
+		to_port		=	22
+
+		cidr_blocks	=	{"0.0.0.0/0"}
+	
+	} 
+}
+
+resource "aws_key_pair" "test_key"{
+		key_name 	=	 "test_key"
+		public_key	=	 "ssh-rsa jkabndjkabjkdbasjdbnasj"
+}
+
+==========================================================================================================
+
+LOOPS:
+
+It is achieved using count keyword
+
+resource "aws_instance" "aws_var_instance"{
+	count			=	3  ------------------> creates 3 EC2 instances
+	ami			=	${var.ami}
+	instance_type		=	${var.instance_type}
+	vpc_security_group_ids	=	["${aws_security_group.allow_ssh.id}"]
+	key_name		=	"test_key"
+
+	tags	{
+		Name = "example-${count.index+1}"	
+
+	}
+}
+
+================================================================================================
+
+Terrform Backend:
+------------------------------------------------------------------------------------------------
+
+When you define terraform backend, then it will check state files in the backend and not locally.
+
+backends can be S3
+
+================================================================================================
+Modules:
+---------------------------------------------------------------------------------------
+It helps in organising the code and makes it re-usable.
+
+Scenario:
+
+Say there EC2 instance and you need to use it for diff env's.  Will you write code for diff env's?
+
+No, write the logic in one file and pass the input based on env
+
+
+Creation of modules:
+
+1. You can create your own modules and place it under module directory.
+
+2. You can upload your module to terraform registry
+
+3. You can make use of existing module from terraform registry.
+
+---------------------------------------------------------------------------------------
+
+Terraform Registry --> It includes a directory of ready to use modules for various common purposes
+
+
+Usage of modules:
+------------------------------------------------------------------------------------
+
+terraform{
+	required_version = "11.11"
+}
+
+provider "aws"{
+	access_key = "AWS ACCESS KEY"
+	secret_key = "AWS SECRET KEY"
+	region 	   = "us-east-1"
+
+}
+
+module "consul"{     ----------------------> COnsul is a predefined module in terrafrom registry
+	source	 = "hasicorp/consul/aws"
+	num_servers = "3"
+}	
+
+Note : If you perform terraform apply --> then automatically init happens, so you dont have to do initialization
+
+All the module information like input and outputs are mentioned in registry
+
+
+========================================================================================
+
+Remote State Storage:
+---------------------------------------------------------------------------------------
+
+So far we have seen terraform used in local machine. But it is not a good practice.
+
+Recommended way is to use Terraform Cloud for remote state storage
+
+
+==================================================================================================
+
+Terraform Sample Codes:
+----------------------------------------------------------------------------------------------------
+
+S3:
+
+resource "aws_s3_bucket" "remoteBackend"{
+	region 		= 	"us-west-2"
+	bucket		=	"terraform-june-01"
+	acl		=	"private"
+
+	tags{
+
+		Name		= 	"terraform test"
+		environment	=	"dev"
+	}
+	
+	versioning{
+		
+		enabled		=	true
+	}
+
+}
+
+========================================================================================================
+
+Terraform Backends:
+
+provider "aws"{
+	region=${var.region_name}
+}
+
+terraform{
+	backend "s3"
+		bucket		=	"terraform-june-01"
+		key		=	"dev/aws-example.tfstate"
+		region		=	${var.region_name}
+
+}
+
+resource "aws_instance" "aws_var_instance"{
+	ami			=	${var.ami}
+	instance_type		=	${var.instance_type}
+	
+}
+
+=======================================================================================================
+
+Modules:
+------------------------------------------------------------------------------------------
+
+Scenario: Create VPC and EC2 instance in different environments.
+
+
+dev:
+-------------------------------------------------
+us-east-1
+t2.micro
+create VPC
+Create EC2
+
+QA:
+-------------------------------------------------
+us-east-2
+t2.small
+create VPC
+Create EC2
+
+prod:
+-------------------------------------------------
+us-west-1
+c1.large
+create VPC
+Create EC2
+
+=====================================================================================
+FOlder Structure:
+
+terraform-app
+	dev
+		main.tf
+	prod
+		main.tf
+	backend.tf
+	modules
+		ec2
+			instances.tf
+			vars.tf
+		vpc
+			networking.tf
+			vars.tf
+
+VPC Module(networking.tf)
+
+resource "aws_vpc" "main"{
+	
+	cidr_block		=	"${var.vpc_cidr}"
+	instance_tenancy	=	"${var.tenancy}"
+
+	tags {
+	
+	Name			=	"main"
+		
+	}
+}
+
+
+resource "aws_subnet" "main"{
+	
+	vpc_id			=	"${var.vpc_id}"  --- > not sure "${"aws_vpc.main.id"}"
+	cidr_block		=	"${var.subnet_cidr}"
+
+	tags {
+	
+	Name			=	"Main"
+		
+	}
+}
+
+
+output "vpc_id" {
+
+	value = "${aws_vpc.main.id}"	
+
+}
+
+output "subnet_id" {
+
+	value = "${aws_subnet.main.id}"	
+
+}
+
+-------------------------------------------------------------------------------------------------
+
+EC2 Module
+
+resource "aws_instance" "web"{
+	count			=	"${var.ec2_count}"  
+	ami			=	"${var.ami_id}"
+	instance_type		=	"${var.instance_type}"
+	subnet_id		=	"${var.subnet_id}"
+	
+	tags	{
+		Name = "Hello World}"	
+
+	}
+}
+--------------------------------------------------------------------------------------------------
+
+dev/main.tf
+
+provider "aws"{
+
+	region		=	"us-east-1"
+}
+
+module "my_vpc" {
+	
+	source		=	"../modules/vpc"
+	vpc_cidr	=	"192.45.6.1/16"
+	tenancy		=	"default"
+	vpc_id		=	"${module.my_vpc.vpc_id}"
+	subnet_cidr	=	"192.45.6.1/24"	
+
+}
+
+module "my_ec2"{
+
+	source		=	"../modules/ec2"
+	ec2_count	=	1
+	ami_id		=	"ami-22nb282n"
+	instance_type	=	"t2.micro"
+	subnet_id	=	"${module.my_vpc.subnet_id}"
+}
+
+------------------------------------------------------------------------------------------------
+backend.tf
+
+terraform{
+	backend "s3"
+		bucket		=	"terraform-june-01"
+		key		=	"dev/terraform-app/app1.tfstate"
+		region		=	"us-west-2"
+
+}
+============================================================================================
+
+Variable example:
+
+Folder struture:
+
+Vars
+	main.tf
+	var.tf
+	out.tf
+
+Note: You can keep variables and outputs in a single .tf file. But to organise things we kept files like main,var and out
+
+var.tf:
+-----------------------------------------------------------
+
+variable "region"{
+	default = "us-east-1"
+}
+
+variable "ami"{
+	default = "ami-ns787h3"
+}
+
+variable "instance-type"{
+	default = "t2.micro"
+}
+
+-----------------------------------------------------------------
+
+main.tf
+----------------------------------------------------------------
+
+provider "aws"{
+	
+	region		=	"${var.region}"
+}
+
+resource "aws_instance" "web"{
+
+	ami		= 	"${var.ami}"
+	instance_type	=	"${var.instance-type}"
+}
+
+----------------------------------------------------------------------
+
+out.tf
+
+output "public_ip"{
+	
+	value		=	"${aws_instance.web.public_ip}"  -->   resource.name.outputattribute
+}
+
+
+==========================================================================
+
+EC2 - Security Group - Key Pair
+
+
+provider "aws"{
+	
+	region		=	"${var.region}"
+}
+
+resource "aws_instance" "web"{
+
+	ami			= 	"${var.ami}"
+	instance_type		=	"${var.instance-type}"
+	vpc_security_group_ids	=	{"${aws_security_group.allow_ssh.id}"}
+	key_name		=	"test_key"
+}
+
+
+
+
+resource "aws_security_group" "allow_ssh"{
+
+	name		=	"allow_ssh"
+	description	=	"allow ssh traffic"
+
+	ingress {
+	
+		from_port	=	22
+		protocol	=	"tcp"
+		to_port		=	22
+		cidr_blocks	=	{"0.0.0.0/0"}
+		}
+		
+}
+
+resource "aws_key_pair" "test_key"{
+	
+	key_name	=	"test_key"
+	public_key	=	"give public from .pub file"
+}
+
+=====================================================================================
+
+Main.tf
+variable.tf		---> i will just define variable(you can define also but just following standard)
+terraform.tfvars --> i will be defining values
+global.tfvars
+output.tfvars
+data.tfvars	--> It is used to fetch already existing resource in AWS
+
+
+region = var.region
+
+Check in variable.tf and terraform.tfvars
+
+variable.tf
+==============================
+
+variable "region"{
+
+}
+
+terraform.tfvars
+===========================
+
+region = "us-west-2"
+
+======================================================================
+
+Data Module:
+
+provider "aws"{
+	
+	region		=	"${var.region}"
+}
+
+resource "aws_instance" "web"{
+
+	ami			= 	data.aws_ami.Amazon_linux.id
+	instance_type		=	"${var.instance_type}"
+	vpc_security_group_ids	=	{"${aws_security_group.allow_ssh.id}"}
+	key_name		=	"test_key"
+}
+
+data "aws_ami" "Amazon_linux"{   ----> use to get the existing resources from AWS
+	
+	most_recent		=	true		---> gets latest ami
+	name_regex		=	"^amzn2jhjkhj"  ---> starts with amzn2
+	owners			=	["12232323"]	---> owner id of the ami, here it is the AWS owner of that ami, but in real 					time it would be our  account ID
+}

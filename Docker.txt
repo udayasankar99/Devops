@@ -1,0 +1,884 @@
+What is Docker?
+
+It is container management tool
+-----------------------------------------------------------------------------------------------
+Tool? - 
+	Saves time and cost 
+	improve quality and efficiency
+	------------------------------------------------
+	-To run apps(Software) but where (in data center)
+-------------------------------------------------------------------------------------------------
+Container?
+	To know about container learn about basic computing architecture. Check below
+
+=============================================================================================	
+How a APP/Software runs in the system?
+--------------------------------------------------------------------------------------------
+Basic computing architecture of Physical machine:
+
+Hardware --> --> Kernel/OS --> Mount(File Systems) --> PID --> Networking --> User1 --> APP1
+									  --> User2 --> APP2
+									  --> User3 --> APP3
+
+
+Users access the above architecture for running the apps. Users are isolated only admin users can access other users
+
+we access apps from outside using the network
+
+If you check task manager.
+
+Name of the app - PID - Status - Username - CPU - Memory
+
+
+Note: PID will be allocated for each users and apps by the system. It starts from 0 and increases
+
+--------------------------------------------------------------------------------------------------------------------
+
+Waht are the resources needed for the running a APP?
+
+Hardware
+	OS
+		Kernel -- > Core Program that controls the system
+			Namespace --> Kernel namespace is the one which creates the following namespaces(User namespace, PID 					namespace, etc)
+							NEED		ALLOWED		CAN CREATE
+--------------------------------------------------------------------------------------------------------------
+					USER		1		Multiple	Multiple	
+					PID		1		1		Multiple
+					MNT		1		1		Multiple	
+					NET		1		1		Multiple
+
+		CGROUP --> Allocates CPU + RAM to process using PID
+		Capabilities -- > decides root or not non root user
+--------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+===================================================================================================
+
+Why Docker?
+
+	Before 90's			after 90's and before 2010's			after 2010's
+------------------------------------------------------------------------------------------------
+
+Physical Server				Virtualization					Docker
+So much of wastage in resources		Virtualization reduces wastages considerably	Container dont use OS
+Installation time high			Installation time very much less
+Server setup 1 week			Server Setup 5 min				Server set up 1s for n no.of 											applications
+==========================================================================================================
+Virtual machine architecture
+--------------------------------------------------------------------------------------------------------
+Hardware --> Kernel/OS --> Hypervisor --> OS --> Mount(File Systems) --> PID --> Networking --> App1/User1(VM1)
+<-----  COMMON 	FOR VM's ------------>	  OS --> Mount(File Systems) --> PID --> Networking --> App2/User2(VM2)
+					  OS --> Mount(File Systems) --> PID --> Networking --> App3/User3(VM3)
+
+
+
+
+Disadvantage of VM's are each VM needs dedicated OS which increase cost, storage, license cost, computing
+
+
+OS is designed early in 1960's for personal computing so they allowed 1 network, 1 PID and 1 MNT, but for Data centers/servers
+require Multiple network, multiple PID and multiple mounts.
+
+OS operators like LInux and Microsoft denied allowing multiple PID, MNT and network because they OS is created for Personal computing and not for Data center.
+
+So Docker was introduced which talks to the Kernel and creates multiple PID, Network and MNT.
+
+
+Computing Architecture with Docker:
+--------------------------------------------------------------------------
+
+Hardware --> Kernel/OS --> Docker --> Mount(File Systems) --> PID --> Networking --> App1/User1(Container1)
+ 				  --> Mount(File Systems) --> PID --> Networking --> App2/User2(Container2)
+				  --> Mount(File Systems) --> PID --> Networking --> App3/User3(Container3)
+
+
+
+Obervations:
+
+Container contains dedicated Mount, PID and Networking.
+Comtainer does not have OS
+Docker talks to the Kernel and creates Container with dedicated mount, network and PID
+
+==========================================================================================================
+
+FileSystems:
+1.Boot File system
+2.Root File System
+3.User File System
+4.Application File system
+
+Container contains ROOT + USER + APP(which is nothing but docker image)
+
+Docker Image = ROOT + USER + APP
+
+OS Image  =  BOOT + ROOT + USER + APP(in virtual machines)
+
+===================================================================================================================
+About DOcker:
+
+Written in GO By Soloman Hykes
+Version 20x
+
+====================================================================================
+
+What is container?
+
+	It is fully independent run time app env.
+
+Or more technically
+		User from usernamespace with dedicated MNT by MNT NS, PID by PID NS and NET by NET NS by docker which takes it from kernel
+
+========================================================================================================================
+Docker Architecture:
+
+Human --> Docker Client --> REST API --> Docker Demon(Server) --> ContainerD --> Kernel
+	=====================================================
+
+		Docker or Docker Engine = Docker Client + Docker Demon Server
+
+Docker Client and Docker Server can be in different machines.
+
+Docker Server and ContainerD should be in same machine where containers are created
+
+ContainerD is used in all container technologies used to talk to the kernel
+===================================================================================================================
+
+Components of Docker
+-----------------------------------------------------------------------------------------
+Docker Engine --> Client + Server
+Docker Registry --> It is a repository where Docker images stored
+		1.Public  --> hub.docker.com
+		2.Private --> artifactory, nexus
+Docker Images --> can contain only root file system(ubuntu, centos)  or can contain root+APPs(jenkins, tomcat)
+
+Docker Container --> When you RUN a docker image with the help of client, the kernel returns u a container
+
+		Human --> Client --> Server --> ContainerD--> Kernel
+		Kernel creates one container for the image
+
+Container mounts with the file system of a image
+Kernel creates PID and attaches to the container
+Kernel creates NET and attaches to the container
+=======================================================================================================
+
+Docker Workflow:
+
+Human --> Client --> Server --> Checks if image is available local registry
+			    --> YES  -->  ContainerD --> Kernel
+			    --> NO   -->  Download from HUB --> ContainerD --> Kernel	
+
+================================================================================
+
+Container Lifecycle:
+---------------------------------------------------------------
+
+Create --> Start --> Stop --> Start --> Restart	--> Pause --> Unpause --> Kill --> Remove 
+===================================================================================
+
+Docker Installation:
+
+Docker commands require root user (sudo -s)
+
+or
+
+User needs to part of linux group called docker.
+
+
+In our demo, We are installing docker in centos using AWS EC2.
+
+IP: 52.66.28.121
+Username - centos
+
+Please refer installation guide
+====================================================================================================================
+
+Docker Commands:
+
+which docker --> bin/docker (docker client)
+
+ps -eaf | grep docker --> /usr/bin/dockerd(docker server)
+
+which containerd --> bin/containerd
+
+docker images --> list images present
+
+docker rmi [image1] [image2] [image3] --> removes images in HOST machine
+
+docker pull image-name --> pulls image from docker hub (go to hub.docker and search official image and copy pull command)
+
+docker ps   --> lists running containers
+
+docker ps -a --> lists all containers
+
+docker create [image-name] --> creates container for that image 
+
+docker create -name [user-defined name] [image-name]  --> creates container for that image with user defined name
+
+docker start [container-id] --> starts the container
+
+docker stop [container-id] --> stops the container
+
+docker restart [container-id] --> restart the container
+
+docker pause [container-id] --> pauses the container
+
+docker unpause [container-id] --> Unpauses the container
+
+docker kill [container-id] --> Exits the container [you can kill only the containers which are up and running]
+
+docker rm [container-id] --> removes the container [you can't remove running container, container whose status are Created 							and Exit you can remove]
+
+history    ---------------> gives the commands you used earlier--> this is not docker cmd, it is linux
+
+Differance btw Kill and Stop, pause and UnPause
+
+
+==============================================================================================================
+
+ps	-->	8558 sudo
+	-->	8560 bash
+
+you are bash here. You need to find parent for that.
+
+
+ps -eaf | grep 8560  --> 8560 8558
+
+ps -eaf | grep 8558  --> 8558 8537
+
+like that you trace till 0
+
+
+ps -eaf | grep containerd --> gives details about containerd
+
+-----------------------------------------------------------------------------------------------------------
+
+docker exec -it [container-id] /bin/bash  --> goes inside the container from root@ip to jenkins@[container-id]
+
+docker exec [container-id] ls /tmp  ---> lists the files inside /tmp directory which is inside the container
+
+docker exec [container-id] touch /tmp/a.txt --> creates file in the tmp directory inside container
+
+docker inspect [container-id] | grep -i ip --> gets the ip of the container
+
+docker exec [container-id] ps -eaf  --> gets PID of the container
+
+
+The above three commands you are accessing from outside(i.e from host machine with root user and not accessing inside the container). You can access ip, PID of the conatainer from inside the container also(get those commands also)
+
+Retrieve mount, ip and pid details from inside the container:
+-------------------------------------------------------------------------
+docker exec -it [container-id] /bin/bash
+df -kh --> mount details
+ps -eaf --> pid
+ip a
+exit  --> comes out of the container
+
+===========================================================================================================
+
+Docker Run command:
+
+
+Pull + Create + Start + Become or attached to the container
+
+docker run jenkins/jenkins --> It pulls, creates, starts and becomes bin/tini(jenkins).
+
+SO the problem here since you become bin/tini and no more bin/bash, your normal commands like touch , ls will noit recognized as bin/tini could not understand your bin/bash commands.
+
+And also if come out by pressing Ctrl+C, the container will be exited. But Why it is exited?
+
+Because, the following are running because of PID's, here bin/tini is PID1 so when you come out(ctrl + C) PID1 will be exited that exits the container
+ 
+Physical Server is running because of pid 1
+Virtual server is running because of pid 1
+Container is also running because of pid 1
+
+Note: Here the container is Jenkins so PID1 is bin/tini, if the container is java, then PID1 is java, So PID1 varies based on container
+--------------------------------------------------------------------------------------------------------------------
+To avoid the above problem, we need detach 
+
+Run -d
+
+Pull + Create + Start + Do NOT Become or attached to the container
+ 
+docker -d run jenkins/jenkins
+
+==========================================================================================================
+How to use Container?
+
+	How to get inside a container?
+		
+		1-exec 
+			using exec you can execute any executable inside a container
+			When you exec of /bin/bash with -it you can go inside a container.
+
+-it - interactive mode --> It helps us to go inside the container and commands inside the conatiner
+
+
+If -it is not used exec will execute the command and come out of the container, you no longer stay inside the container
+
+Example --> docker exec [container-id] ps -eaf --> exec executes ps inside container and come out to Host 
+	    docker exec -it [container-id] /bin/bash  --> exec executes bin/bash and go inside the container because of -it	
+
+		2- attach
+			using attch commands - you can become or attached to the container. You attached to PID1
+
+docker attach jenkins/jenkins --> you are inside container and become /bin/tini
+
+attach is used by developers mostly to check logs. So they go inside container by attach command and check logs
+
+==============================================================================================================
+Interesting Scenario:
+------------------------------------------------------------------------------------------------------------
+docker run ubuntu -- creates container
+
+docker ps  --> no container running
+
+docker ps -a  --> ubuntu container exited but why it is exited when jenkins container was up and running using the same 			command
+
+Because ubuntu is bin/bash and jenkins is bin/tini. bin/tini  will hold PID1 whereas bin/bash execute and then kills PID1
+
+docker run ubuntu  df -kh --> executes the commands and returns output and kills the PID1. So exits the container
+-----------------------------------------------------------------------------------
+So to hold use -->>>>>>>>>>>>>>>>>docker run -it ubuntu /bin/bash
+----------------------------------------------------------------------------------
+Remember you kill bin/bash using exit command
+=========================================================================================================================
+docker run ubuntu 			--> Creates and runs the container then exits
+docker run -it ubuntu /bin/bash  	--> Creates and runs the container in a interactive mode, you will become/attached
+docker run -itd ubuntu /bin/bash	--> Creates and runs the container in a interactive and detached mode, you will not 						become/attached
+==========================================================================================================================
+How to access from outside?
+
+docker run -d jenkins/jenkins
+
+docker inspect [container-id] | grep -i ip
+
+curl http://172.24.56.8:8080  --  can access jenkins page
+
+But can you access the same IP address outside in a browser -------->  NOOOO
+
+
+The problem is container network scope is only within the host and not outside. So we use concept of port forwarding/ PROXY
+
+
+docker run -d -p [External_Port : Container_port] jenkins/jenkins
+
+docker run -d -p 8080:8080 jenkins/jenkins --> COntainer1
+docker run -d -p 8081:8080 jenkins/jenkins --> Container2
+
+Now get the ip address of the host machine and try to access
+
+HostMachineIP:8080 --> container1
+HostMachineIP:8081 --> container2
+
+=============================================================================================
+
+More Docker commands:
+
+cp: copy files and folder between container and local machine
+---------------------------------------------------------------------------------
+Ex: 	touch file1.txt
+	docker cp file1.txt [container-id]:/tmp
+	docker exec [container-id] ls /tmp  --> file1.txt(inside container)
+
+Copy from container to local
+
+	docker cp [container-id]:/tmp/file1.txt . (. is current directory in host machine)
+	ls   --> file1.txt (in host machine)
+
+==========================================================================
+
+diff: Changes to container like ADD,CHANGE,DELETE will be deducted by diff.
+
+	docker diff [container-id]
+	
+	docker attach [conatainer-id] (become Container)
+	ps (you are inside container)
+	cd /etc/
+	ls
+	rm -rf issue --> Basically you are doing some changes inside the conatiner and check that using diff command
+	cat >> issue.net --> Enter some text
+Press CTRL+PQ to come out of edit mode
+	more issue.net
+
+Now you did some changes inside the container. Now you need to come out of the conatiner, but you cannot exit using exit command, since it kills bash which is PID1 here. So the alternative is CTRL+PQ
+
+	CTRL+PQ
+-------------------------------------------------------------------------------------------------------
+
+inspect:
+
+docker inspect [container-id] --> docker inspect 7637489743
+docker inspect [images]       --> docker inspect jenkins/jenkins
+
+===========================================================================================
+
+port:
+
+docker port [container-id]
+
+docker run -d jenins/jenkins
+docker port [container-id] --> nothing will display because port configiration is not present in run command
+
+docker run -d -p 8080:8080 jenkins/jenkins
+docker port [container-id]  --> port configirations will be displayed
+
+=========================================================================================
+
+rename:
+
+docker rename [conatiner-id] [Userdefined container name]
+============================================================================================
+
+Docker Monitoring commands:
+-----------------------------------------------------------------------------
+
+docker stats --> Provide container status like CPU PID memory
+
+docker stats [container-id] --> for a particular container
+
+docker stats --no-stream --> Prints and come out
+
+docker logs [container-id]
+
+docker top [container-id]  -- helps to find out the PID of any container in host machine(means you dont have to go inside 				container )
+
+docker events --> monitors the docker server --> Open two consoles/terminals--> one terminal give docker events
+					-->  another terminal give your normal docker commands --> see the updates terminal1
+
+==============================================================================================================
+
+Images and Container Closer Look:
+----------------------------------------------------------------------------------------
+
+Docker Image is made up of filesystems layered over each other. 
+
+	Layer0(Boot file system- ubuntu) --> Layer1(Root File system- nginx) --> Layer2(Updates)
+
+you can create image with layer0 alone
+You can create image with layer1 (layer 0 also comee with that)
+You can create image with layer2 (layer0 + layer1 + layer2)
+
+IMAGE --> Layer2 ---> 	Merged Layer --> COntainer1
+   	  Layer1 --->.		     --> COntainer2
+	  Layer0 ---> 		     --> COntainer3
+
+	<--Read Only--><--Read/Write-->
+
+docker inspect [image-name]  --> you can get layers info
+
+docker history [image-name]
+
+df -kh --> mnt info --> oyu could see the merged mnt(maerging all layers)
+
+Merge Conflicts --> Higher layers always win 
+
+Union Mount - It is responsible for merging. It is a kind of algorithm exist in windows or linux
+
+====================================================================================================
+
+Root Location:
+
+Docker root Dir:  /var/lib/docker (you get it using docker info command)
+
+In the root directory give ls -l
+
+containers 	--> meta data of the conatiner
+image 		--> meta data of the conatiner
+overlay2	--> This containes all data layers
+volumes		--> Volume
+network		--> Network Object
+
+
+Image			Container
+			Layer3 --> Merged Layer (Read/Write)
+	Layer2		Layer2
+	Layer1		Layer1
+	Layer0		Layer0
+			
+All the Layers except Merged Layer are read only. Only Merged Layer is Read/Write
+
+Merged Layer consists of diff and merged directories mainly
+
+cd merged --> contains everything 
+cd diff   --> contains nothing
+
+Why diff contains nothing? because we did not do anything in the container.
+
+Now see what happens when we do someting in the conatiner.
+
+docker exec [container-id] touch/opt/file.txt
+cd ..
+ls
+find . -name file1.txt
+		--> diff directory
+		--> merged directory
+
+SO file1.txt is available in both diff and merged directory.
+
+which means whatever you do on the container like add, delete, update in the container gets reflected in both merged and diff directories.
+
+
+diff is kind of referance and merged is the actual content.
+
+Let me prove.
+
+1. Stop the container--> merged directory will be deleted --> diff directory remains as it is.
+2. Start the container --> merged directory will be created again with the contents existed before.
+
+
+HOw merged directory created with contents existed before??
+
+Merged directory wil be created by merging all the layers from the image as well as from diff directory at runtime.
+
+
+SUMMARY:
+
+1. Image contains multiple file system
+2. Each file system is layered over each other so we call it layer.
+3. Base layer is root file system and on top of it app and other layer mounted
+4. When you create container, all layers is getting merged into one additional layer
+5. All layers of image are read only, additional layer is R/W
+6. Merging is done by union mount.
+7. Container layer is primarily divided into 2
+	1. merged = contains all layers of the image
+	2. diff   = contains all the changes done in conatiner
+8. When container stops, merged directory disappears
+9. When conatiner starts, merged directory forms by merging diff and all layers from the image
+
+
+===============================================================================================================
+
+How to develop a docker Image?
+
+Method 1 : Manual Way:
+		- Use "docker commit"
+		- Require - a existing container
+			- One layer at a time
+
+Method 2 : CI/CD - Automated way
+		- Use "docker build"
+		- Require Dockerfile
+			- Create multiple layer
+==========================================================================
+The Requirement:
+--------------------------------------------------------------------
+Base - Ubuntu
+------->Update --> GIT --> Apache --> Copy index.html - Set a env...
+-----------------------------------------------------------------------------------
+Method1 - Manual way
+
+Base - Ubuntu:
+
+	docker run -itd ubuntu
+
+Update: 
+	
+	vi index.html
+	docker attach [container-id]
+
+-- Inside container now----	
+	
+	ps
+	apt-get update  (Update)
+	apt-get install git (installs git)
+	apt-get install apache2 (install apache)
+	
+ctrl + p+q --> to go out container
+
+	docker cp index.html [container-id]:/var/www/html (copies index.html to container at var/www/html)
+	docker exec [container-id] more /var/www/html/index.html
+
+Now UPdate + GIT + Apache + Copy index.html  are done in a single container
+
+	docker commit -m "some message" -a "author name" [container-id] "image-name"
+	docker images --> check your image is present
+	docker run -itd [our image] --> contains GIT, Apache and index file 
+
+
+
+index.html:
+<h1>Welcome to Docker</h1>
+--------------------------------------------------------------------------------------
+
+Method2 - Automated way
+
+Docker File:
+Contains 
+	List of instructions
+	Each line creates one layer
+	Each layer get created from the container of previous line of dockerfile
+
+
+Sample docker file for the above requirement:
+-----------------------------------------------------------------------------------------
+FROM ubuntu
+MAINTAINER Udayasankar udayasankar99@gmail.com
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update
+RUN apt-get -y install tzdata --> it add tzdata(country information etc)
+RUN apt-get install git -y
+RUN apt-get install apache2 -y
+COPY index.html /var/www/html/
+ENV JAVA_HOME=/opt/java
+
+--> vi dockerfile
+--> docker build -t fromdockerfile . (here fromdockerfile is image tobe build)
+--> docker run -itd fromdockerfile
+--> docker exec [container] env
+--> docker exec [container-id] ls /var/www/html
+
+
+Docker File2:
+
+FROM openjdk:8-jdk
+RUN apt-get update && apt-get install git curl && rm -rf /var/lib/apt/lists/*
+
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=1000
+etc
+.
+.
+.
+
+RUN groupadd -g ${uid} ${group} --  ARG is used here
+
+VOLUME /var/jenkins_home
+
+EXPOSE ${http_port}
+
+USER ${user}
+
+
+ENTRYPOINT VS CMD
+==============================================
+
+You can set PID 1 using entrypoint and cmd.
+
+Entry POint:
+It cannot be replaced
+
+jenkins docker file uses ENTRYPOINT
+
+	docker -d run jenkins/jenkins
+	docker ps -a
+		--> [contaiuner-id] "/bin/tini"
+	docker -d run jenkins/jenkins ls
+	docker ps -a
+		--> [contaiuner-id] "/bin/tini" -- cannot be replaced
+
+
+
+CMD:
+It can be replaced.
+
+ubuntu docker file uses CMD
+
+Ex: 	docker run ubuntu
+	docker ps -a
+		--> [contaiuner-id] "/bin/bash"
+	docker run ubuntu ls
+	docker ps -a 
+		--> [contaiuner-id] "ls"--> you see "/bin/bash" is replaced with "ls"				 
+
+
+
+Scenarios in DOCKER FILE:
+
+2 CMD ??
+2 ENTRYPOINT ??
+1 CMD 1 ENTRYPOINT ??
+
+
+When will execute and exit?
+	CMD echo "HELLO WORLD" --> Prints Hello worls and exits	
+
+When will execute and stay?
+
+	CMD /usr/sbin/apache2ctl -D FOREGROUND --> -D is detached mode and so container will stay
+======================================================================================
+	
+Tracing Images:
+
+YOu can easily trace images from where it got created. Here we are going to see Jenkins image.
+
+jenkins
+	openjdk:8-jdk
+		buildpack-deps:buster-scm
+			buildpack-deps:buster-curl
+				debian:buster
+					scratch
+
+
+Check the docker file in docker hub and FROM keyword in that way you can easily trace how image got created.
+
+==========================================================================================
+
+Sharing Images:
+
+
+YOu can share or store images in two ways:
+
+1. Using tar Ball
+2. Using Registry
+	-Public
+		hub.docker.com
+		google registry
+		Azure repos
+		ECR Amazon
+	-Private
+		Artifact
+		Nexus
+		
+
+Example:
+	Create a image and share
+
+	---->	vi dockerfile
+	---->	docker build -t first .
+
+Image "first" is created
+
+Share the image using tar ball.
+
+	---->  docker save -o first.tar first (o -output)
+
+you can send the first.tar to someone.
+
+NOw how do you use the file
+
+docker load -i first.tar (i - input)	--> it loads the image in your local
+
+docker images --> your loaded will be available now
+
+Method2:
+
+hub.docker.com
+-------------------------------------------------
+
+Step1: Register and verify your free account @hub.docker.com[1 pvt + unilimited public repo]	
+Step2: Create a empty repo @hub.docker.com
+Step3: Create one image in local
+Step4: Make sure that name of the repo@hub.docker.com == name of the repo @ local
+Step5: dcoker login --> Provide login credentials
+Step6: docker push [image-name]
+Step7: docker logout
+
+
+Tag command:
+
+Say your image name is "first" but you want change the name
+
+docker tag first newimagename--> first is changed to newimagename
+
+tag is not like an rename - it is kind of alias
+ 
+
+How do you create image from the middle layer of some existing image??
+---------------------------------------------------------------------------------
+Method1:
+docker tag [image-id] [new image name]
+
+example:
+
+docker history <existing-image>
+
+	--> [image-id1]
+	    [image-id2]
+
+you want to create image from image-id2,
+
+docker tag image-id2 mynewimage
+
+--------------------------------------------------------------------
+
+Method2:
+
+using import and export, you can create image
+
+Diff btw import & export and save & load??
+
+
+import and export creates image by making it into one single layer
+
+save & load - creates image as it is means layers will be present and it will not flatten the image
+
+===================================================================================================================
+
+Docker Volumes:
+
+HOw to have data persitency beyond a lifecycle of a container?
+
+In simple words, container is deleted but data of the container should not be deleted
+
+Answer is Docker Volumes
+
+---------------------------------------------------------------------------------
+Without Volume:
+Host System
+	Container --> Layers/File system
+
+	The problem here is when container is removed or deleted all the data gone
+
+----------------------------------------------------------------------------------
+With Volumes:
+
+Host System
+	Container
+	Volume 	 ---> Layers/File SYstem
+	
+	Here even though containers are deleted data will be retained because they are stored in volumes and volumes are just mounted to the container
+
+These volumes can be mounted many containers
+
+Host System:
+	Volume 	--> Container1
+		--> Container2
+		--> Container3
+----------------------------------------------------------------------
+Types of driver
+--------------------------------------------------
+
+Many types are there, but primarily three types are there
+
+- Volume  = data snywheretored in /var/lib/docker/volumes
+- mountgf = anywhere in the host mount
+- tempfs  = memory
+
+Docker Volume commands:
+
+create		-	create a volume
+inspect		-	displays detailed info about volume
+ls		-	List Volune
+prune		- 	remove all unsused volume
+rm		-	remove one or more volumes
+
+
+docker volume create dev
+docker volume ls --> lists docker volumes
+ls --> list files along with docker volumes also as volume is also a file system
+cd dev
+ls
+cd _data/  --> _data gets created when volume dev is created
+
+docker run -itd -v dev:/opt/uday ubuntu -- docker run -itd -v [volume name]:[container location where volume mounts
+] [image name] 
+
+docker exec [container-id] df -kh --> check volume got created or not
+
+
+In the above way, volume is created in a particular location that is "dev" is created in /var/lib/docker/volumes
+But when you want to create volume in any location in the host, follow the below command
+
+docker run -itd -v /opt/backup:/opt/uday ubuntu -- docker run -itd -v [path of the volume in the host]:[container location where volume mounts] [image name] 
+
+Mounting 2 volumes:
+docker run -itd -v dev:/opt/uday -v /opt/backup:/opt/uday ubuntu
+
+
+
+https://github.com/devopsschool-training-notes/Docker-Kubernetes-Wipro-GE-may-2020/blob/master/Day1.txt
